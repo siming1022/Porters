@@ -48,7 +48,7 @@ public class MoveMain
 	
 	public static void main(String[] args) 
 	{
-		log.info("read excel begin2");
+		log.info("read excel begin");
 		File baseDir = new File(EXCEL_LOCATION);
 		
 		if (baseDir != null && baseDir.exists() && baseDir.isDirectory())
