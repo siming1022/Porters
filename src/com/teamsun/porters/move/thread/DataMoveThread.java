@@ -8,16 +8,18 @@ import javax.annotation.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.teamsun.porters.move.domain.BaseMoveDomain;
 import com.teamsun.porters.move.domain.HdfsDto;
 import com.teamsun.porters.move.domain.conf.ConfigDomain;
 import com.teamsun.porters.move.exception.BaseException;
+import com.teamsun.porters.move.op.MoveOpration;
 import com.teamsun.porters.move.server.MoveServer;
 import com.teamsun.porters.move.util.Constants;
 
 public class DataMoveThread extends Thread 
 {
 	private static Logger log = LoggerFactory.getLogger(DataMoveThread.class);
-	private List<ConfigDomain> configDatas = new ArrayList<ConfigDomain>();
+	private List<MoveOpration> moveOps = new ArrayList<MoveOpration>();
 	
 	@Resource
 	private MoveServer moveServer;
@@ -31,45 +33,19 @@ public class DataMoveThread extends Thread
 		super();
 	}
 
-	public DataMoveThread(List<ConfigDomain> configData) 
+	public DataMoveThread(List<MoveOpration> moveOps) 
 	{
-		this.configDatas = configData;
+		this.moveOps = moveOps;
 	}
 	
 	@Override
 	public void run() 
 	{
-		for (ConfigDomain configDto : this.configDatas)
+		for (MoveOpration moveOp : moveOps)
 		{
 			try 
 			{
-				if (Constants.DATA_SOUCE_TYPE_H2H.equals(configDto.getType()))
-				{
-					HdfsDto srcDto = new HdfsDto();
-					HdfsDto destDto = new HdfsDto();
-					
-					moveServer.move2Hdfs(srcDto, destDto);
-				}
-				else if(Constants.DATA_SOUCE_TYPE_H2H.equals(configDto.getType()))
-				{
-					
-				}
-				else if(Constants.DATA_SOUCE_TYPE_H2H.equals(configDto.getType()))
-				{
-					
-				}
-				else if(Constants.DATA_SOUCE_TYPE_H2H.equals(configDto.getType()))
-				{
-					
-				}
-				else if(Constants.DATA_SOUCE_TYPE_H2H.equals(configDto.getType()))
-				{
-					
-				}
-				else if(Constants.DATA_SOUCE_TYPE_H2H.equals(configDto.getType()))
-				{
-					
-				}
+				moveOp.move();
 			}
 			catch (BaseException e) 
 			{

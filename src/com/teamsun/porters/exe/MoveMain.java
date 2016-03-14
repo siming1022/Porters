@@ -22,12 +22,13 @@ import org.slf4j.LoggerFactory;
 
 import com.teamsun.porters.move.domain.conf.ConfigDomain;
 import com.teamsun.porters.move.exception.BaseException;
+import com.teamsun.porters.move.factory.MoveOprationFactory;
+import com.teamsun.porters.move.op.MoveOpration;
 import com.teamsun.porters.move.server.MoveServer;
 import com.teamsun.porters.move.thread.DataMoveThread;
 import com.teamsun.porters.move.util.Constants;
 import com.teamsun.porters.move.util.ExcelUtil;
 import com.teamsun.porters.move.util.StringUtils;
-import com.teamsun.porters.move.valid.ValidConfig;
 
 
 /**
@@ -79,14 +80,14 @@ public class MoveMain
 				try 
 				{
 					is = new FileInputStream(excelFile);
-					List<ConfigDomain> configDtos = getEntitys(ExcelUtil.readExcel(is, true));
+					List<MoveOpration> oprations = getEntitys(ExcelUtil.readExcel(is, true));
 					
-					int threadCount = configDtos.size()%EXEC_COUNT==0?configDtos.size()/EXEC_COUNT:(configDtos.size()/50)+1;
+					int threadCount = oprations.size()%EXEC_COUNT==0?oprations.size()/EXEC_COUNT:(oprations.size()/50)+1;
 					ExecutorService threadPool = Executors.newFixedThreadPool(threadCount);
 					
 					for (int i = 0; i < threadCount; i++)
 					{
-						threadPool.execute(new DataMoveThread(configDtos.subList(i * EXEC_COUNT, ((i+1) * EXEC_COUNT) - 1)));
+						threadPool.execute(new DataMoveThread(oprations.subList(i * EXEC_COUNT, ((i+1) * EXEC_COUNT) - 1)));
 					}
 					
 					threadPool.shutdown();
@@ -115,9 +116,9 @@ public class MoveMain
 		}
 	}
 
-	private static List<ConfigDomain> getEntitys(List<Map<String, Object>> readExcel) 
+	private static List<MoveOpration> getEntitys(List<Map<String, Object>> readExcel) 
 	{
-		List<ConfigDomain> configDatas = new ArrayList<ConfigDomain>();
+		List<MoveOpration> moveOps = new ArrayList<MoveOpration>();
 		Map<String, Object> config = null;
 		
 		for (int i = 1; i < readExcel.size(); i++)
@@ -126,10 +127,16 @@ public class MoveMain
 			
 			try 
 			{
-				validConfig(config);
+				ConfigDomain cd = getConfigDto(config);
 				
-				ConfigDomain cd = getEntity(config);
-				configDatas.add(cd);
+				MoveOpration mo = MoveOprationFactory.create(cd.getType());
+				mo.setType(cd.getType());
+				mo.setConfigDto(cd);
+				
+				//对Excel里的参数进行验证，如果验证出错，会抛出异常
+				mo.valid();
+				
+				moveOps.add(mo);
 			} 
 			catch (BaseException e) 
 			{
@@ -138,11 +145,21 @@ public class MoveMain
 			}
 		}
 		
-		return configDatas;
+		return moveOps;
 	}
 
-	private static ConfigDomain getEntity(Map<String, Object> config) 
+	private static ConfigDomain getConfigDto(Map<String, Object> config) throws BaseException
 	{
+		if (StringUtils.isObjEmpty(config.get("dataSouce")))
+		{
+			throw new BaseException("请选择数据源");
+		}
+
+		if (StringUtils.isObjEmpty(config.get("dataDest")))
+		{
+			throw new BaseException("请选择数据目的");
+		}
+		
 		ConfigDomain configDomain = new ConfigDomain();
 		String dataSouce = config.get("dataSouce").toString();
 		String dataDest = config.get("dataDest").toString();
@@ -154,52 +171,8 @@ public class MoveMain
 		return configDomain;
 	}
 
-	private static void validConfig(Map<String, Object> config) throws BaseException
-	{
-		String dataSource = null;
-		String dataDest = null;
-		
-		if (StringUtils.isObjEmpty(dataSource))
-		{
-			throw new BaseException("请选择数据源");
-		}
-
-		if (StringUtils.isObjEmpty(dataDest))
-		{
-			throw new BaseException("请选择数据目的");
-		}
-		
-		String type = dataSource.toUpperCase() + "2" + dataDest.toUpperCase();
-		
-		if (Constants.DATA_SOUCE_TYPE_H2H.equals(type))
-		{
-			ValidConfig.validH2H(config); 
-		}
-		else if (Constants.DATA_SOUCE_TYPE_H2O.equals(type))
-		{
-			ValidConfig.validH2O(config); 
-		}
-		else if (Constants.DATA_SOUCE_TYPE_H2T.equals(type))
-		{
-			ValidConfig.validH2T(config); 
-		}
-		else if (Constants.DATA_SOUCE_TYPE_H2HB.equals(type))
-		{
-			ValidConfig.validH2HB(config); 
-		}
-		else if (Constants.DATA_SOUCE_TYPE_H2V.equals(type))
-		{
-			ValidConfig.validH2V(config); 
-		}
-		else if (Constants.DATA_SOUCE_TYPE_H2M.equals(type))
-		{
-			ValidConfig.validH2M(config); 
-		}
-	}
-	
 	public static void transMap2Bean(Map<String, Object> map, Object obj) 
 	{
-
 		try 
 		{
 			BeanInfo beanInfo = Introspector.getBeanInfo(obj.getClass());
