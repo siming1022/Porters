@@ -1,6 +1,7 @@
 package com.teamsun.porters.move.util;
 
 import com.teamsun.porters.move.domain.DBMoveDomain;
+import com.teamsun.porters.move.domain.HdfsDto;
 import com.teamsun.porters.move.domain.table.ColumnsDto;
 
 /**
@@ -11,12 +12,12 @@ import com.teamsun.porters.move.domain.table.ColumnsDto;
  */
 public class SqlUtils 
 {
-	public static String genHiveTxtTableSql(DBMoveDomain dbDomain)
+	public static String genHiveTxtTableSql(HdfsDto srcDto, DBMoveDomain destDto)
 	{
 		
-		StringBuffer sb = new StringBuffer(" drop table if exists " + dbDomain.getDatabaseName().toUpperCase() + "." + dbDomain.getTableName().toUpperCase() + "; \n");
+		StringBuffer sb = new StringBuffer(" drop table if exists TEST." + destDto.getTableName().toUpperCase() + "; \n");
 		
-		for (ColumnsDto colDto : dbDomain.getTableDto().getColumnList()) 
+		for (ColumnsDto colDto : destDto.getTableDto().getColumnList()) 
         {
     		sb.append(colDto.getColumnName() + " " + changeType(colDto.getSqlType().toUpperCase()) + "," + " \n");
         }
@@ -35,7 +36,8 @@ public class SqlUtils
         sb.append("OUTPUTFORMAT" + "\n");
         sb.append("'org.apache.hadoop.hive.ql.io.HiveIgnoreKeyTextOutputFormat' \n");
         sb.append("LOCATION \n");
-        sb.append("'/EMS_Data/teamsun/temp/" + dbDomain.getTableName().toUpperCase() + "'; \n");
+        sb.append("'" + srcDto.getHdfsLoc() + "'; \n");
+        
 		return sb.toString();
 	}
 	

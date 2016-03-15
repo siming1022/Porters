@@ -6,12 +6,13 @@ import org.slf4j.LoggerFactory;
 import com.teamsun.porters.move.domain.BaseMoveDomain;
 import com.teamsun.porters.move.domain.conf.ConfigDomain;
 import com.teamsun.porters.move.exception.BaseException;
+import com.teamsun.porters.move.factory.MoveDtoFactory;
+import com.teamsun.porters.move.util.SqoopUtils;
 import com.teamsun.porters.move.util.StringUtils;
 
 public class Hdfs2VerticaOp extends MoveOpration
 {
 	private static Logger log = LoggerFactory.getLogger(Hdfs2VerticaOp.class);
-	
 	
 	public Hdfs2VerticaOp(){}
 	
@@ -50,9 +51,17 @@ public class Hdfs2VerticaOp extends MoveOpration
 	}
 
 	@Override
-	public void move()
-			throws BaseException {
-		// TODO Auto-generated method stub
+	public void move() throws BaseException 
+	{
+		BaseMoveDomain srcDto = MoveDtoFactory.createSrcDto(configDto);
+		BaseMoveDomain destDto = MoveDtoFactory.createDestDto(configDto);
+				
+		String sqoopCommand = SqoopUtils.genExportToVertica(srcDto, destDto);
 		
+		log.info("begin to from hdfs to vertica");
+		String command = sqoopCommand;
+		String res = runCommand(command);
+		log.info("run command res: " + res);
+		log.info("from hdfs to vertica finish");
 	}
 }

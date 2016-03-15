@@ -28,7 +28,7 @@ public class DBMSMetaUtil {
 	 * 
 	 */
 	public static enum DATABASETYPE {
-		ORACLE, MYSQL, SQLSERVER, SQLSERVER2005, DB2, INFORMIX, SYBASE, OTHER, EMPTY
+		ORACLE, MYSQL, SQLSERVER, SQLSERVER2005, DB2, INFORMIX, SYBASE, TERADATA, VERTICA, HIVE, OTHER, EMPTY
 	}
 
 	/**
@@ -93,24 +93,39 @@ public class DBMSMetaUtil {
 			return DATABASETYPE.SYBASE;
 		}
 
+		// TERADATA 数据库
+		if (databasetype.contains("TERADATA")) {
+			//
+			return DATABASETYPE.TERADATA;
+		}
+
+		// VERTICA 数据库
+		if (databasetype.contains("VERTICA")) {
+			//
+			return DATABASETYPE.VERTICA;
+		}
+
+		// HIVE 数据库
+		if (databasetype.contains("HIVE")) {
+			//
+			return DATABASETYPE.HIVE;
+		}
+
 		// 默认,返回其他
 		return DATABASETYPE.OTHER;
 	}
 	
-	public static TableDto getTableDto(String databasetype, String driverClass, String ip, String port, String dbname, String username, String password, String tableName)
+	public static TableDto getTableDto(DATABASETYPE dbtype, String driverClass, String ip, String port, String dbname, String username, String password, String tableName)
 	{
 		TableDto tableDto = new TableDto();
 		
 		// 去除首尾空格
-		databasetype = trim(databasetype);
 		ip = trim(ip);
 		port = trim(port);
 		dbname = trim(dbname);
 		username = trim(username);
 		password = trim(password);
 		tableName = trim(tableName);
-		//
-		DATABASETYPE dbtype = parseDATABASETYPE(databasetype);
 		//
 		String url = concatDBURL(dbtype, ip, port, dbname);
 		Connection conn = getConnection(driverClass, url, username, password);
@@ -156,6 +171,18 @@ public class DBMSMetaUtil {
 				tableNamePattern = "%";
 				rs = meta.getTables(catalog, schemaPattern, tableNamePattern, types);
 			} else if (DATABASETYPE.SYBASE.equals(dbtype)) {
+				// SqlServer
+				tableNamePattern = "%";
+				rs = meta.getTables(catalog, schemaPattern, tableNamePattern, types);
+			} else if (DATABASETYPE.TERADATA.equals(dbtype)) {
+				// SqlServer
+				tableNamePattern = "%";
+				rs = meta.getTables(catalog, schemaPattern, tableNamePattern, types);
+			} else if (DATABASETYPE.VERTICA.equals(dbtype)) {
+				// SqlServer
+				tableNamePattern = "%";
+				rs = meta.getTables(catalog, schemaPattern, tableNamePattern, types);
+			} else if (DATABASETYPE.HIVE.equals(dbtype)) {
 				// SqlServer
 				tableNamePattern = "%";
 				rs = meta.getTables(catalog, schemaPattern, tableNamePattern, types);
@@ -381,6 +408,17 @@ public class DBMSMetaUtil {
 			url += "jdbc:sybase:Tds:";
 			url += ip.trim();
 			url += ":" + port.trim();
+			url += "/" + dbname;
+		} else if (DATABASETYPE.TERADATA.equals(dbtype)) {
+			url += "jdbc:teradata://";
+			url += ip.trim();
+			url += "/TSNANO=0,CLIENT_CHARSET=cp936,TMODE=TERA,CHARSET=ASCII,DATABASE=" + dbname;
+		} else if (DATABASETYPE.VERTICA.equals(dbtype)) {
+			//jdbc:vertica://docd04.verticacorp.com:5433/dbname
+			//jdbc:vertica://<ip>:5433/<db>
+			url += "jdbc:vertica://";
+			url += ip.trim();
+			url += ":5433";
 			url += "/" + dbname;
 		} else {
 			throw new RuntimeException("不认识的数据库类型!");

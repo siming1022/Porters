@@ -22,7 +22,14 @@ public class ConfigDomain extends BaseMoveDomain
 	private String destDBUserName;
 	private String souceDBPwd;
 	private String destDBPwd;
+	private String destTableRowkey;
 	
+	public String getDestTableRowkey() {
+		return destTableRowkey;
+	}
+	public void setDestTableRowkey(String destTableRowkey) {
+		this.destTableRowkey = destTableRowkey;
+	}
 	public String getType() {
 		return type;
 	}

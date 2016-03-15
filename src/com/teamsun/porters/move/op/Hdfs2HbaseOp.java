@@ -1,11 +1,19 @@
 package com.teamsun.porters.move.op;
 
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.teamsun.porters.move.domain.BaseMoveDomain;
+import com.teamsun.porters.move.domain.HbaseDto;
+import com.teamsun.porters.move.domain.HdfsDto;
 import com.teamsun.porters.move.domain.conf.ConfigDomain;
 import com.teamsun.porters.move.exception.BaseException;
+import com.teamsun.porters.move.factory.MoveDtoFactory;
+import com.teamsun.porters.move.util.DBMSMetaUtil;
 import com.teamsun.porters.move.util.SqlUtils;
 import com.teamsun.porters.move.util.StringUtils;
 
@@ -25,11 +33,31 @@ public class Hdfs2HbaseOp extends MoveOpration
 	public void move() throws BaseException 
 	{
 		//1.通过Java JDBC连接Hive Server2
-//		Connection conn = DBMSMetaUtil.getConnection(dto.getDriverClass(), dto.getJdbcUrl(), dto.getUserName(), dto.getPasswd());
-//		Statement stm = conn.createStatement();
+		Connection conn = null;
+		Statement stm = null;
+		ResultSet rs = null;
+		try 
+		{
+			HdfsDto srcDto = (HdfsDto) MoveDtoFactory.createSrcDto(configDto);
+			HbaseDto destDto = (HbaseDto) MoveDtoFactory.createDestDto(configDto);
+			
+			String createExtTableSql = SqlUtils.genHiveTxtTableSql(srcDto, destDto);
+			conn = DBMSMetaUtil.getConnection(destDto.getDriverClass(), destDto.getJdbcUrl(), destDto.getUserName(), destDto.getPasswd());
+			stm = conn.createStatement();
+			rs = stm.executeQuery(createExtTableSql);
+			
+			String bulkloadCommand = null;
+		}
+		catch (SQLException e) 
+		{
+			e.printStackTrace();
+		}
+		finally
+		{
+			
+		}
 //		ResultSet rs = stm.executeQuery("");
 		
-//		String createExtTableSql = SqlUtils.genHiveTxtTableSql(dto);
 		//2.建一张Txt外表
 		//3.通过BulkLoad导入至Hbase
 	}

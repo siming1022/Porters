@@ -4,13 +4,15 @@ import java.text.MessageFormat;
 
 import com.teamsun.porters.move.domain.HdfsDto;
 import com.teamsun.porters.move.domain.BaseMoveDomain;
+import com.teamsun.porters.move.domain.MySqlDto;
 import com.teamsun.porters.move.domain.OracleDto;
 import com.teamsun.porters.move.domain.TeradataDto;
+import com.teamsun.porters.move.domain.VerticaDto;
 import com.teamsun.porters.move.template.SqoopCommandTemplate;
 
 public class SqoopUtils 
 {
-	public String genExportToOralce(BaseMoveDomain srcMd, BaseMoveDomain destMd)
+	public static String genExportToOralce(BaseMoveDomain srcMd, BaseMoveDomain destMd)
 	{
 		HdfsDto srcDto = (HdfsDto) srcMd;
 		OracleDto destDto = (OracleDto) destMd;
@@ -23,7 +25,7 @@ public class SqoopUtils
 				StringUtils.getValue(srcDto.getInputNullString(), Constants.SQOOP_INPUT_NULL_STRING), StringUtils.getValue(srcDto.getNullNonString(), Constants.SQOOP_NULL_NON_STRING));
 	}
 
-	public String genExportToTeradata(BaseMoveDomain srcMd, BaseMoveDomain destMd)
+	public static String genExportToTeradata(BaseMoveDomain srcMd, BaseMoveDomain destMd)
 	{
 		HdfsDto srcDto = (HdfsDto) srcMd;
 		TeradataDto destDto = (TeradataDto) destMd;
@@ -31,7 +33,31 @@ public class SqoopUtils
 		//sqoop export --connect {0} --driver{1} --username {2} --password {3} --table {4} --export-dir {5}
 		
 		return MessageFormat.format(SqoopCommandTemplate.SQOOP_HDFS_2_TERADATA, 
-				destDto.getJdbcUrl(), Constants.TERADATA_DRIVER, destDto.getUserName(), destDto.getPasswd(), 
+				destDto.getJdbcUrl(), Constants.DB_DRIVER_CLASS_TERADATA, destDto.getUserName(), destDto.getPasswd(), 
+				destDto.getTableName(), srcDto.getHdfsLoc());
+	}
+
+	public static String genExportToVertica(BaseMoveDomain srcMd, BaseMoveDomain destMd)
+	{
+		HdfsDto srcDto = (HdfsDto) srcMd;
+		VerticaDto destDto = (VerticaDto) destMd;
+		
+		//sqoop export --connect {0} --driver{1} --username {2} --password {3} --table {4} --export-dir {5}
+		
+		return MessageFormat.format(SqoopCommandTemplate.SQOOP_HDFS_2_VERTICA, 
+				destDto.getJdbcUrl(), Constants.DB_DRIVER_CLASS_VERTICA, destDto.getUserName(), destDto.getPasswd(), 
+				destDto.getTableName(), srcDto.getHdfsLoc());
+	}
+
+	public static String genExportToMySql(BaseMoveDomain srcMd, BaseMoveDomain destMd)
+	{
+		HdfsDto srcDto = (HdfsDto) srcMd;
+		MySqlDto destDto = (MySqlDto) destMd;
+		
+		//sqoop export --connect {0} --driver{1} --username {2} --password {3} --table {4} --export-dir {5}
+		
+		return MessageFormat.format(SqoopCommandTemplate.SQOOP_HDFS_2_MYSQL, 
+				destDto.getJdbcUrl(), Constants.DB_DRIVER_CLASS_MYSQL, destDto.getUserName(), destDto.getPasswd(), 
 				destDto.getTableName(), srcDto.getHdfsLoc());
 	}
 }

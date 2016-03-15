@@ -4,16 +4,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.teamsun.porters.move.domain.BaseMoveDomain;
-import com.teamsun.porters.move.domain.OracleDto;
 import com.teamsun.porters.move.domain.conf.ConfigDomain;
 import com.teamsun.porters.move.exception.BaseException;
+import com.teamsun.porters.move.factory.MoveDtoFactory;
 import com.teamsun.porters.move.util.SqoopUtils;
 import com.teamsun.porters.move.util.StringUtils;
 
 public class Hdfs2OracleOp extends MoveOpration
 {
 	private static Logger log = LoggerFactory.getLogger(Hdfs2OracleOp.class);
-	private SqoopUtils sqoopUtils = new SqoopUtils();
 	
 	public Hdfs2OracleOp(){}
 	
@@ -54,11 +53,15 @@ public class Hdfs2OracleOp extends MoveOpration
 	@Override
 	public void move() throws BaseException 
 	{
-		String sqoopCommand = sqoopUtils.genExportToOralce(srcDomain, dto);
+		BaseMoveDomain srcDto = MoveDtoFactory.createSrcDto(configDto);
+		BaseMoveDomain destDto = MoveDtoFactory.createDestDto(configDto);
+				
+		String sqoopCommand = SqoopUtils.genExportToOralce(srcDto, destDto);
 		
 		log.info("begin to from hdfs to oracle");
 		String command = sqoopCommand;
-		Runtime.getRuntime().exec(command);
+		String res = runCommand(command);
+		log.info("run command res: " + res);
 		log.info("from hdfs to oracle finish");
 	}
 }

@@ -8,17 +8,13 @@ import com.teamsun.porters.move.domain.OracleDto;
 import com.teamsun.porters.move.domain.TeradataDto;
 import com.teamsun.porters.move.domain.VerticaDto;
 import com.teamsun.porters.move.domain.conf.ConfigDomain;
-import com.teamsun.porters.move.op.Hdfs2HbaseOp;
-import com.teamsun.porters.move.op.Hdfs2HdfsOp;
-import com.teamsun.porters.move.op.Hdfs2MySqlOp;
-import com.teamsun.porters.move.op.Hdfs2OracleOp;
-import com.teamsun.porters.move.op.Hdfs2TeradataOp;
-import com.teamsun.porters.move.op.Hdfs2VerticaOp;
 import com.teamsun.porters.move.util.Constants;
+import com.teamsun.porters.move.util.DBMSMetaUtil;
+import com.teamsun.porters.move.util.DBMSMetaUtil.DATABASETYPE;
 
 public class MoveDtoFactory 
 {
-	public BaseMoveDomain createSrcDto(ConfigDomain configDto)
+	public static BaseMoveDomain createSrcDto(ConfigDomain configDto)
 	{
 		String dataSource = configDto.getDataSource().toUpperCase();
 		
@@ -35,7 +31,7 @@ public class MoveDtoFactory
 		}
 	}
 
-	public BaseMoveDomain createDestDto(ConfigDomain configDto)
+	public static BaseMoveDomain createDestDto(ConfigDomain configDto)
 	{
 		String dataDest = configDto.getDataDest().toUpperCase();
 		
@@ -49,6 +45,18 @@ public class MoveDtoFactory
 		else if (Constants.DATA_TYPE_ORACLE.equals(dataDest))
 		{
 			OracleDto dto = new OracleDto();
+			dto.setDatabaseName(configDto.getDestDBName());
+			dto.setIp(configDto.getDestDBIp());
+			dto.setPort(configDto.getDestDBPort());
+			dto.setUserName(configDto.getDestDBUserName());
+			dto.setPasswd(configDto.getDestDBPwd());
+			dto.setTableName(configDto.getDestTable());
+			
+			DATABASETYPE databaseType = DBMSMetaUtil.parseDATABASETYPE(dataDest);
+			dto.setDriverClass(Constants.DB_DRIVER_CLASS_ORACLE);
+			dto.setJdbcUrl(DBMSMetaUtil.concatDBURL(databaseType, configDto.getDestDBIp(), configDto.getDestDBPort(), configDto.getDestDBName()));
+			dto.setTableDto(DBMSMetaUtil.getTableDto(databaseType, Constants.DB_DRIVER_CLASS_ORACLE, configDto.getDestDBIp(), configDto.getDestDBPort(), configDto.getDestDBName()
+			, configDto.getDestDBUserName(), configDto.getDestDBPwd(), configDto.getDestTable()));
 			
 			return dto;
 		}
@@ -56,11 +64,37 @@ public class MoveDtoFactory
 		{
 			TeradataDto dto = new TeradataDto();
 			
+			dto.setDatabaseName(configDto.getDestDBName());
+			dto.setIp(configDto.getDestDBIp());
+			dto.setPort(configDto.getDestDBPort());
+			dto.setUserName(configDto.getDestDBUserName());
+			dto.setPasswd(configDto.getDestDBPwd());
+			dto.setTableName(configDto.getDestTable());
+			
+			DATABASETYPE databaseType = DBMSMetaUtil.parseDATABASETYPE(dataDest);
+			dto.setDriverClass(Constants.DB_DRIVER_CLASS_TERADATA);
+			dto.setJdbcUrl(DBMSMetaUtil.concatDBURL(databaseType, configDto.getDestDBIp(), configDto.getDestDBPort(), configDto.getDestDBName()));
+			dto.setTableDto(DBMSMetaUtil.getTableDto(databaseType, Constants.DB_DRIVER_CLASS_TERADATA, configDto.getDestDBIp(), configDto.getDestDBPort(), configDto.getDestDBName()
+					, configDto.getDestDBUserName(), configDto.getDestDBPwd(), configDto.getDestTable()));
+			
 			return dto;
 		}
 		else if (Constants.DATA_TYPE_VERTICA.equals(dataDest))
 		{
 			VerticaDto dto = new VerticaDto();
+			
+			dto.setDatabaseName(configDto.getDestDBName());
+			dto.setIp(configDto.getDestDBIp());
+			dto.setPort(configDto.getDestDBPort());
+			dto.setUserName(configDto.getDestDBUserName());
+			dto.setPasswd(configDto.getDestDBPwd());
+			dto.setTableName(configDto.getDestTable());
+			
+			DATABASETYPE databaseType = DBMSMetaUtil.parseDATABASETYPE(dataDest);
+			dto.setDriverClass(Constants.DB_DRIVER_CLASS_VERTICA);
+			dto.setJdbcUrl(DBMSMetaUtil.concatDBURL(databaseType, configDto.getDestDBIp(), configDto.getDestDBPort(), configDto.getDestDBName()));
+			dto.setTableDto(DBMSMetaUtil.getTableDto(databaseType, Constants.DB_DRIVER_CLASS_VERTICA, configDto.getDestDBIp(), configDto.getDestDBPort(), configDto.getDestDBName()
+					, configDto.getDestDBUserName(), configDto.getDestDBPwd(), configDto.getDestTable()));
 			
 			return dto;
 		}
@@ -68,11 +102,38 @@ public class MoveDtoFactory
 		{
 			HbaseDto dto = new HbaseDto();
 			
+			dto.setDatabaseName(configDto.getDestDBName());
+			dto.setIp(configDto.getDestDBIp());
+			dto.setPort(configDto.getDestDBPort());
+			dto.setUserName(configDto.getDestDBUserName());
+			dto.setPasswd(configDto.getDestDBPwd());
+			dto.setTableName(configDto.getDestTable());
+			dto.setRowkeys(configDto.getDestTableRowkey());
+			
+			DATABASETYPE databaseType = DBMSMetaUtil.parseDATABASETYPE(dataDest);
+			dto.setDriverClass(Constants.DB_DRIVER_CLASS_HIVE);
+			dto.setJdbcUrl(DBMSMetaUtil.concatDBURL(databaseType, configDto.getDestDBIp(), configDto.getDestDBPort(), configDto.getDestDBName()));
+			dto.setTableDto(DBMSMetaUtil.getTableDto(databaseType, Constants.DB_DRIVER_CLASS_HIVE, configDto.getDestDBIp(), configDto.getDestDBPort(), configDto.getDestDBName()
+					, configDto.getDestDBUserName(), configDto.getDestDBPwd(), configDto.getDestTable()));
+			
 			return dto;
 		}
 		else if (Constants.DATA_TYPE_MYSQL.equals(dataDest))
 		{
 			MySqlDto dto = new MySqlDto();
+			
+			dto.setDatabaseName(configDto.getDestDBName());
+			dto.setIp(configDto.getDestDBIp());
+			dto.setPort(configDto.getDestDBPort());
+			dto.setUserName(configDto.getDestDBUserName());
+			dto.setPasswd(configDto.getDestDBPwd());
+			dto.setTableName(configDto.getDestTable());
+			
+			DATABASETYPE databaseType = DBMSMetaUtil.parseDATABASETYPE(dataDest);
+			dto.setDriverClass(Constants.DB_DRIVER_CLASS_MYSQL);
+			dto.setJdbcUrl(DBMSMetaUtil.concatDBURL(databaseType, configDto.getDestDBIp(), configDto.getDestDBPort(), configDto.getDestDBName()));
+			dto.setTableDto(DBMSMetaUtil.getTableDto(databaseType, Constants.DB_DRIVER_CLASS_MYSQL, configDto.getDestDBIp(), configDto.getDestDBPort(), configDto.getDestDBName()
+					, configDto.getDestDBUserName(), configDto.getDestDBPwd(), configDto.getDestTable()));
 			
 			return dto;
 		}

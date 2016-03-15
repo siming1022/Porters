@@ -14,8 +14,6 @@ public class Constants
 	
 	public static final String SQOOP_NULL_NON_STRING = "'\\\\N'";
 	
-	public static final String TERADATA_DRIVER = "com.ncr.teradata.TeraDriver";
-	
 	public static final String DATA_MOVE_TYPE_H2H = "HDFS2HDFS";
 
 	public static final String DATA_MOVE_TYPE_H2O = "HDFS2ORACLE";
@@ -39,5 +37,15 @@ public class Constants
 	public static final String DATA_TYPE_HBASE = "HBASE";
 	
 	public static final String DATA_TYPE_MYSQL = "MYSQL";
+	
+	public static final String DB_DRIVER_CLASS_ORACLE = "oracle.jdbc.driver.OracleDriver";
+
+	public static final String DB_DRIVER_CLASS_TERADATA = "com.ncr.teradata.TeraDriver";
+
+	public static final String DB_DRIVER_CLASS_VERTICA = "co m.vertica.jdbc.Driver";
+
+	public static final String DB_DRIVER_CLASS_MYSQL = "com.mysql.jdbc.Driver";
+
+	public static final String DB_DRIVER_CLASS_HIVE = "org.apache.hive.jdbc.HiveDriver";
 
 }
