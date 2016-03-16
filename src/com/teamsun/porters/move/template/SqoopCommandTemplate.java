@@ -16,7 +16,9 @@ public class SqoopCommandTemplate
 
 	public static final String SQOOP_HDFS_2_MYSQL = "sqoop export --connect {0} --username {1} --password {2} --table {3} --export-dir {4} --fields-terminated-by {5} --input-null-string {6} --null-non-string {7} --m {8}";
 
-	public static final String SQOOP_ORACLE_2_HDFS = "";
+	public static final String SQOOP_ORACLE_2_HDFS_BY_SQL = "sqoop import --connect \"{0}\" --username {1} --password {2} --query {3} --target-dir {4} --input-null-string {5} --null-non-string {6} --m {7}";
+
+	public static final String SQOOP_ORACLE_2_HDFS = "sqoop import --connect \"{0}\" --username {1} --password {2} --table {3} --target-dir {4} --input-null-string {5} --null-non-string {6} --m {7}";
 	
 	public static final String SQOOP_TERADATA_2_HDFS = "";
 }

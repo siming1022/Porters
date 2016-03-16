@@ -60,4 +60,26 @@ public class SqoopUtils
 				destDto.getJdbcUrl(), Constants.DB_DRIVER_CLASS_MYSQL, destDto.getUserName(), destDto.getPasswd(), 
 				destDto.getTableName(), srcDto.getHdfsLoc());
 	}
+
+	public static String genImportFromOralceToHdfs(BaseMoveDomain srcMd, BaseMoveDomain destMd, boolean isAll) 
+	{
+		OracleDto srcDto = (OracleDto) srcMd;
+		HdfsDto destDto = (HdfsDto) destMd;
+		
+		String command = null;
+		if (isAll)
+		{
+			command = MessageFormat.format(SqoopCommandTemplate.SQOOP_ORACLE_2_HDFS,
+					srcDto.getJdbcUrl(), srcDto.getUserName(), srcDto.getPasswd(), srcDto.getTableName(), destDto.getHdfsLoc(),
+					StringUtils.getValue(destDto.getInputNullString(), Constants.SQOOP_INPUT_NULL_STRING), StringUtils.getValue(destDto.getNullNonString(), Constants.SQOOP_NULL_NON_STRING), "1");
+		}
+		else
+		{
+			command = MessageFormat.format(SqoopCommandTemplate.SQOOP_ORACLE_2_HDFS_BY_SQL,
+					srcDto.getJdbcUrl(), srcDto.getUserName(), srcDto.getPasswd(), srcDto.getQuerySql(), destDto.getHdfsLoc(),
+					StringUtils.getValue(destDto.getInputNullString(), Constants.SQOOP_INPUT_NULL_STRING), StringUtils.getValue(destDto.getNullNonString(), Constants.SQOOP_NULL_NON_STRING), "1");
+		}
+		
+		return command;
+	}
 }

@@ -1,4 +1,4 @@
-package com.teamsun.porters.move.op;
+package com.teamsun.porters.move.op.hdfs;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -13,6 +13,7 @@ import com.teamsun.porters.move.domain.HdfsDto;
 import com.teamsun.porters.move.domain.conf.ConfigDomain;
 import com.teamsun.porters.move.exception.BaseException;
 import com.teamsun.porters.move.factory.MoveDtoFactory;
+import com.teamsun.porters.move.op.MoveOpration;
 import com.teamsun.porters.move.util.DBMSMetaUtil;
 import com.teamsun.porters.move.util.SqlUtils;
 import com.teamsun.porters.move.util.StringUtils;
@@ -46,7 +47,16 @@ public class Hdfs2HbaseOp extends MoveOpration
 			stm = conn.createStatement();
 			rs = stm.executeQuery(createExtTableSql);
 			
-			String bulkloadCommand = null;
+			String bulkloadCommand = SqlUtils.getBulkloadSql(destDto);
+
+			stm = conn.createStatement();
+			rs = stm.executeQuery(bulkloadCommand);
+			
+			String deleteExtTableSql = SqlUtils.genDelHiveTxtTableSql(destDto);
+			stm = conn.createStatement();
+			rs = stm.executeQuery(deleteExtTableSql);
+			
+			conn.commit();
 		}
 		catch (SQLException e) 
 		{
@@ -54,12 +64,10 @@ public class Hdfs2HbaseOp extends MoveOpration
 		}
 		finally
 		{
-			
+			DBMSMetaUtil.close(rs);
+			DBMSMetaUtil.close(stm);
+			DBMSMetaUtil.close(conn);
 		}
-//		ResultSet rs = stm.executeQuery("");
-		
-		//2.建一张Txt外表
-		//3.通过BulkLoad导入至Hbase
 	}
 
 	@Override

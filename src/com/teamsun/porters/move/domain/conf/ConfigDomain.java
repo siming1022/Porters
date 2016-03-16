@@ -16,19 +16,34 @@ public class ConfigDomain extends BaseMoveDomain
 	private String destDBIp;
 	private String sourceDBPort;
 	private String destDBPort;
-	private String souceDBName;
+	private String sourceDBName;
 	private String destDBName;
-	private String souceDBUserName;
+	private String sourceDBUserName;
 	private String destDBUserName;
-	private String souceDBPwd;
+	private String sourceDBPwd;
 	private String destDBPwd;
 	private String destTableRowkey;
+	private String columns;
+	private String sourceDBTns;
+	private String destDBTns;
 	
-	public String getDestTableRowkey() {
-		return destTableRowkey;
+	public String getSourceDBTns() {
+		return sourceDBTns;
 	}
-	public void setDestTableRowkey(String destTableRowkey) {
-		this.destTableRowkey = destTableRowkey;
+	public void setSourceDBTns(String sourceDBTns) {
+		this.sourceDBTns = sourceDBTns;
+	}
+	public String getDestDBTns() {
+		return destDBTns;
+	}
+	public void setDestDBTns(String destDBTns) {
+		this.destDBTns = destDBTns;
+	}
+	public String getColumns() {
+		return columns;
+	}
+	public void setColumns(String columns) {
+		this.columns = columns;
 	}
 	public String getType() {
 		return type;
@@ -102,11 +117,11 @@ public class ConfigDomain extends BaseMoveDomain
 	public void setDestDBPort(String destDBPort) {
 		this.destDBPort = destDBPort;
 	}
-	public String getSouceDBName() {
-		return souceDBName;
+	public String getSourceDBName() {
+		return sourceDBName;
 	}
-	public void setSouceDBName(String souceDBName) {
-		this.souceDBName = souceDBName;
+	public void setSourceDBName(String sourceDBName) {
+		this.sourceDBName = sourceDBName;
 	}
 	public String getDestDBName() {
 		return destDBName;
@@ -114,11 +129,11 @@ public class ConfigDomain extends BaseMoveDomain
 	public void setDestDBName(String destDBName) {
 		this.destDBName = destDBName;
 	}
-	public String getSouceDBUserName() {
-		return souceDBUserName;
+	public String getSourceDBUserName() {
+		return sourceDBUserName;
 	}
-	public void setSouceDBUserName(String souceDBUserName) {
-		this.souceDBUserName = souceDBUserName;
+	public void setSourceDBUserName(String sourceDBUserName) {
+		this.sourceDBUserName = sourceDBUserName;
 	}
 	public String getDestDBUserName() {
 		return destDBUserName;
@@ -126,11 +141,11 @@ public class ConfigDomain extends BaseMoveDomain
 	public void setDestDBUserName(String destDBUserName) {
 		this.destDBUserName = destDBUserName;
 	}
-	public String getSouceDBPwd() {
-		return souceDBPwd;
+	public String getSourceDBPwd() {
+		return sourceDBPwd;
 	}
-	public void setSouceDBPwd(String souceDBPwd) {
-		this.souceDBPwd = souceDBPwd;
+	public void setSourceDBPwd(String sourceDBPwd) {
+		this.sourceDBPwd = sourceDBPwd;
 	}
 	public String getDestDBPwd() {
 		return destDBPwd;
@@ -138,4 +153,11 @@ public class ConfigDomain extends BaseMoveDomain
 	public void setDestDBPwd(String destDBPwd) {
 		this.destDBPwd = destDBPwd;
 	}
+	public String getDestTableRowkey() {
+		return destTableRowkey;
+	}
+	public void setDestTableRowkey(String destTableRowkey) {
+		this.destTableRowkey = destTableRowkey;
+	}
+	
 }

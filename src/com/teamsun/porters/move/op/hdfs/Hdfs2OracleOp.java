@@ -1,4 +1,4 @@
-package com.teamsun.porters.move.op;
+package com.teamsun.porters.move.op.hdfs;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -7,16 +7,17 @@ import com.teamsun.porters.move.domain.BaseMoveDomain;
 import com.teamsun.porters.move.domain.conf.ConfigDomain;
 import com.teamsun.porters.move.exception.BaseException;
 import com.teamsun.porters.move.factory.MoveDtoFactory;
+import com.teamsun.porters.move.op.MoveOpration;
 import com.teamsun.porters.move.util.SqoopUtils;
 import com.teamsun.porters.move.util.StringUtils;
 
-public class Hdfs2MySqlOp extends MoveOpration
+public class Hdfs2OracleOp extends MoveOpration
 {
-	private static Logger log = LoggerFactory.getLogger(Hdfs2MySqlOp.class);
+	private static Logger log = LoggerFactory.getLogger(Hdfs2OracleOp.class);
 	
-	public Hdfs2MySqlOp(){}
+	public Hdfs2OracleOp(){}
 	
-	public Hdfs2MySqlOp(String type, ConfigDomain configDto)
+	public Hdfs2OracleOp(String type, ConfigDomain configDto)
 	{
 		super(type, configDto);
 	}
@@ -56,12 +57,12 @@ public class Hdfs2MySqlOp extends MoveOpration
 		BaseMoveDomain srcDto = MoveDtoFactory.createSrcDto(configDto);
 		BaseMoveDomain destDto = MoveDtoFactory.createDestDto(configDto);
 				
-		String sqoopCommand = SqoopUtils.genExportToMySql(srcDto, destDto);
+		String sqoopCommand = SqoopUtils.genExportToOralce(srcDto, destDto);
 		
-		log.info("begin to from hdfs to mysql");
+		log.info("begin to from hdfs to oracle");
 		String command = sqoopCommand;
 		String res = runCommand(command);
 		log.info("run command res: " + res);
-		log.info("from hdfs to mysql finish");
+		log.info("from hdfs to oracle finish");
 	}
 }

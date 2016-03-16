@@ -12,7 +12,7 @@ import com.teamsun.porters.move.template.HdfsTemplate;
  */
 public class HdfsUtils 
 {
-	public String genCopyCommand(String srcHdfsLoc, String destHdfsLoc)
+	public static String genCopyCommand(String srcHdfsLoc, String destHdfsLoc)
 	{
 		return MessageFormat.format(HdfsTemplate.HDFS_COPY, srcHdfsLoc, destHdfsLoc);
 	}

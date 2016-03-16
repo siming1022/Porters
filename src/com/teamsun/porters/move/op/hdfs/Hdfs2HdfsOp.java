@@ -1,17 +1,17 @@
-package com.teamsun.porters.move.op;
+package com.teamsun.porters.move.op.hdfs;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.teamsun.porters.move.domain.conf.ConfigDomain;
 import com.teamsun.porters.move.exception.BaseException;
+import com.teamsun.porters.move.op.MoveOpration;
 import com.teamsun.porters.move.util.HdfsUtils;
 import com.teamsun.porters.move.util.StringUtils;
 
 public class Hdfs2HdfsOp extends MoveOpration
 {
 	private static Logger log = LoggerFactory.getLogger(Hdfs2HdfsOp.class);
-	private HdfsUtils hdfsUtils = new HdfsUtils();
 	
 	public Hdfs2HdfsOp(){}
 	
@@ -46,7 +46,7 @@ public class Hdfs2HdfsOp extends MoveOpration
 	public void move() throws BaseException 
 	{
 		log.info("begin to from hdfs to hdfs");
-		String command = hdfsUtils.genCopyCommand(configDto.getSourceHdfsLoc(), configDto.getDestHdfsLoc());
+		String command = HdfsUtils.genCopyCommand(configDto.getSourceHdfsLoc(), configDto.getDestHdfsLoc());
 		String res = runCommand(command);
 		log.info("hdfs 2 hdsf res: " + res);
 		log.info("from hdfs to hdfs finish");

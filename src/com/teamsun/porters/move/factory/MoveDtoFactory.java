@@ -10,6 +10,7 @@ import com.teamsun.porters.move.domain.VerticaDto;
 import com.teamsun.porters.move.domain.conf.ConfigDomain;
 import com.teamsun.porters.move.util.Constants;
 import com.teamsun.porters.move.util.DBMSMetaUtil;
+import com.teamsun.porters.move.util.StringUtils;
 import com.teamsun.porters.move.util.DBMSMetaUtil.DATABASETYPE;
 
 public class MoveDtoFactory 
@@ -22,6 +23,26 @@ public class MoveDtoFactory
 		{
 			HdfsDto dto = new HdfsDto();
 			dto.setHdfsLoc(configDto.getSourceHdfsLoc());
+			
+			return dto;
+		}
+		else if (Constants.DATA_TYPE_ORACLE.equals(dataSource))
+		{
+			OracleDto dto = new OracleDto();
+			dto.setDatabaseName(configDto.getSourceDBName());
+			dto.setIp(configDto.getSourceDBIp());
+			dto.setPort(configDto.getSourceDBPort());
+			dto.setUserName(configDto.getSourceDBUserName());
+			dto.setPasswd(configDto.getSourceDBPwd());
+			dto.setTableName(configDto.getSourceTable());
+			dto.setQuerySql(configDto.getQuerySql());
+			
+			DATABASETYPE databaseType = DBMSMetaUtil.parseDATABASETYPE(dataSource);
+			dto.setDriverClass(Constants.DB_DRIVER_CLASS_ORACLE);
+			String jdbcUrl = StringUtils.isEmpty(dto.getTns())?DBMSMetaUtil.concatDBURL(databaseType, configDto.getSourceDBIp(), configDto.getSourceDBPort(), configDto.getSourceDBName()):dto.getTns();
+			dto.setJdbcUrl(jdbcUrl);
+			dto.setTableDto(DBMSMetaUtil.getTableDto(databaseType, Constants.DB_DRIVER_CLASS_ORACLE, configDto.getSourceDBIp(), configDto.getSourceDBPort(), configDto.getSourceDBName()
+			, configDto.getSourceDBUserName(), configDto.getSourceDBPwd(), configDto.getSourceTable()));
 			
 			return dto;
 		}
@@ -54,7 +75,9 @@ public class MoveDtoFactory
 			
 			DATABASETYPE databaseType = DBMSMetaUtil.parseDATABASETYPE(dataDest);
 			dto.setDriverClass(Constants.DB_DRIVER_CLASS_ORACLE);
-			dto.setJdbcUrl(DBMSMetaUtil.concatDBURL(databaseType, configDto.getDestDBIp(), configDto.getDestDBPort(), configDto.getDestDBName()));
+			
+			String jdbcUrl = StringUtils.isEmpty(dto.getTns())?DBMSMetaUtil.concatDBURL(databaseType, configDto.getDestDBIp(), configDto.getDestDBPort(), configDto.getDestDBName()):dto.getTns();
+			dto.setJdbcUrl(jdbcUrl);
 			dto.setTableDto(DBMSMetaUtil.getTableDto(databaseType, Constants.DB_DRIVER_CLASS_ORACLE, configDto.getDestDBIp(), configDto.getDestDBPort(), configDto.getDestDBName()
 			, configDto.getDestDBUserName(), configDto.getDestDBPwd(), configDto.getDestTable()));
 			
@@ -73,7 +96,8 @@ public class MoveDtoFactory
 			
 			DATABASETYPE databaseType = DBMSMetaUtil.parseDATABASETYPE(dataDest);
 			dto.setDriverClass(Constants.DB_DRIVER_CLASS_TERADATA);
-			dto.setJdbcUrl(DBMSMetaUtil.concatDBURL(databaseType, configDto.getDestDBIp(), configDto.getDestDBPort(), configDto.getDestDBName()));
+			String jdbcUrl = StringUtils.isEmpty(dto.getTns())?DBMSMetaUtil.concatDBURL(databaseType, configDto.getDestDBIp(), configDto.getDestDBPort(), configDto.getDestDBName()):dto.getTns();
+			dto.setJdbcUrl(jdbcUrl);
 			dto.setTableDto(DBMSMetaUtil.getTableDto(databaseType, Constants.DB_DRIVER_CLASS_TERADATA, configDto.getDestDBIp(), configDto.getDestDBPort(), configDto.getDestDBName()
 					, configDto.getDestDBUserName(), configDto.getDestDBPwd(), configDto.getDestTable()));
 			
@@ -92,7 +116,8 @@ public class MoveDtoFactory
 			
 			DATABASETYPE databaseType = DBMSMetaUtil.parseDATABASETYPE(dataDest);
 			dto.setDriverClass(Constants.DB_DRIVER_CLASS_VERTICA);
-			dto.setJdbcUrl(DBMSMetaUtil.concatDBURL(databaseType, configDto.getDestDBIp(), configDto.getDestDBPort(), configDto.getDestDBName()));
+			String jdbcUrl = StringUtils.isEmpty(dto.getTns())?DBMSMetaUtil.concatDBURL(databaseType, configDto.getDestDBIp(), configDto.getDestDBPort(), configDto.getDestDBName()):dto.getTns();
+			dto.setJdbcUrl(jdbcUrl);
 			dto.setTableDto(DBMSMetaUtil.getTableDto(databaseType, Constants.DB_DRIVER_CLASS_VERTICA, configDto.getDestDBIp(), configDto.getDestDBPort(), configDto.getDestDBName()
 					, configDto.getDestDBUserName(), configDto.getDestDBPwd(), configDto.getDestTable()));
 			
@@ -112,7 +137,8 @@ public class MoveDtoFactory
 			
 			DATABASETYPE databaseType = DBMSMetaUtil.parseDATABASETYPE(dataDest);
 			dto.setDriverClass(Constants.DB_DRIVER_CLASS_HIVE);
-			dto.setJdbcUrl(DBMSMetaUtil.concatDBURL(databaseType, configDto.getDestDBIp(), configDto.getDestDBPort(), configDto.getDestDBName()));
+			String jdbcUrl = StringUtils.isEmpty(dto.getTns())?DBMSMetaUtil.concatDBURL(databaseType, configDto.getDestDBIp(), configDto.getDestDBPort(), configDto.getDestDBName()):dto.getTns();
+			dto.setJdbcUrl(jdbcUrl);
 			dto.setTableDto(DBMSMetaUtil.getTableDto(databaseType, Constants.DB_DRIVER_CLASS_HIVE, configDto.getDestDBIp(), configDto.getDestDBPort(), configDto.getDestDBName()
 					, configDto.getDestDBUserName(), configDto.getDestDBPwd(), configDto.getDestTable()));
 			
@@ -131,7 +157,8 @@ public class MoveDtoFactory
 			
 			DATABASETYPE databaseType = DBMSMetaUtil.parseDATABASETYPE(dataDest);
 			dto.setDriverClass(Constants.DB_DRIVER_CLASS_MYSQL);
-			dto.setJdbcUrl(DBMSMetaUtil.concatDBURL(databaseType, configDto.getDestDBIp(), configDto.getDestDBPort(), configDto.getDestDBName()));
+			String jdbcUrl = StringUtils.isEmpty(dto.getTns())?DBMSMetaUtil.concatDBURL(databaseType, configDto.getDestDBIp(), configDto.getDestDBPort(), configDto.getDestDBName()):dto.getTns();
+			dto.setJdbcUrl(jdbcUrl);
 			dto.setTableDto(DBMSMetaUtil.getTableDto(databaseType, Constants.DB_DRIVER_CLASS_MYSQL, configDto.getDestDBIp(), configDto.getDestDBPort(), configDto.getDestDBName()
 					, configDto.getDestDBUserName(), configDto.getDestDBPwd(), configDto.getDestTable()));
 			

@@ -10,7 +10,34 @@ public abstract class DBMoveDomain extends BaseMoveDomain
 	private String tableName;
 	private String driverClass;
 	private TableDto tableDto;
+	private String querySql;
+	private String columns;
+	private String tns;
 	
+	public String getTns() {
+		return tns;
+	}
+
+	public void setTns(String tns) {
+		this.tns = tns;
+	}
+
+	public String getColumns() {
+		return columns;
+	}
+
+	public void setColumns(String columns) {
+		this.columns = columns;
+	}
+
+	public String getQuerySql() {
+		return querySql;
+	}
+
+	public void setQuerySql(String querySql) {
+		this.querySql = querySql;
+	}
+
 	public TableDto getTableDto() {
 		return tableDto;
 	}

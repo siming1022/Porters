@@ -1,12 +1,12 @@
 package com.teamsun.porters.move.factory;
 
-import com.teamsun.porters.move.op.Hdfs2HbaseOp;
-import com.teamsun.porters.move.op.Hdfs2HdfsOp;
-import com.teamsun.porters.move.op.Hdfs2MySqlOp;
-import com.teamsun.porters.move.op.Hdfs2OracleOp;
-import com.teamsun.porters.move.op.Hdfs2TeradataOp;
-import com.teamsun.porters.move.op.Hdfs2VerticaOp;
 import com.teamsun.porters.move.op.MoveOpration;
+import com.teamsun.porters.move.op.hdfs.Hdfs2HbaseOp;
+import com.teamsun.porters.move.op.hdfs.Hdfs2HdfsOp;
+import com.teamsun.porters.move.op.hdfs.Hdfs2MySqlOp;
+import com.teamsun.porters.move.op.hdfs.Hdfs2OracleOp;
+import com.teamsun.porters.move.op.hdfs.Hdfs2TeradataOp;
+import com.teamsun.porters.move.op.hdfs.Hdfs2VerticaOp;
 import com.teamsun.porters.move.util.Constants;
 
 public class MoveOprationFactory 

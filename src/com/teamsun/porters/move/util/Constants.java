@@ -47,5 +47,7 @@ public class Constants
 	public static final String DB_DRIVER_CLASS_MYSQL = "com.mysql.jdbc.Driver";
 
 	public static final String DB_DRIVER_CLASS_HIVE = "org.apache.hive.jdbc.HiveDriver";
+	
+	public static final String HIVE_EXT_DATABASE_NAME = "TEST";
 
 }

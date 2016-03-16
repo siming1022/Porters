@@ -1,7 +1,6 @@
 package com.teamsun.porters.move.op;
 
 import java.io.BufferedReader;
-import java.io.IOException;
 import java.io.InputStreamReader;
 
 import com.teamsun.porters.move.domain.conf.ConfigDomain;
