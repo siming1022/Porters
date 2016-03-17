@@ -6,7 +6,7 @@ import org.slf4j.LoggerFactory;
 import com.teamsun.porters.move.domain.conf.ConfigDomain;
 import com.teamsun.porters.move.exception.BaseException;
 import com.teamsun.porters.move.op.MoveOpration;
-import com.teamsun.porters.move.op.oracle.Oralce2HbaseOp;
+import com.teamsun.porters.move.op.oracle.Oracle2HbaseOp;
 
 public class Teradata2Hdfs extends MoveOpration 
 {

@@ -1,26 +1,24 @@
-package com.teamsun.porters.move.op.teradata;
+package com.teamsun.porters.move.op.oracle;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.teamsun.porters.move.domain.BaseMoveDomain;
 import com.teamsun.porters.move.domain.OracleDto;
-import com.teamsun.porters.move.domain.TeradataDto;
 import com.teamsun.porters.move.domain.conf.ConfigDomain;
 import com.teamsun.porters.move.exception.BaseException;
 import com.teamsun.porters.move.factory.MoveDtoFactory;
 import com.teamsun.porters.move.op.MoveOpration;
-import com.teamsun.porters.move.op.oracle.Oracle2HbaseOp;
 import com.teamsun.porters.move.util.SqoopUtils;
 import com.teamsun.porters.move.util.StringUtils;
 
-public class Teradata2Hbase extends MoveOpration 
+public class Oracle2HdfsOp extends MoveOpration
 {
-private static Logger log = LoggerFactory.getLogger(Teradata2Hbase.class);
+	private static Logger log = LoggerFactory.getLogger(Oracle2HdfsOp.class);
 	
-	public Teradata2Hbase(){}
+	public Oracle2HdfsOp(){}
 	
-	public Teradata2Hbase(String type, ConfigDomain configDto)
+	public Oracle2HdfsOp(String type, ConfigDomain configDto)
 	{
 		super(type, configDto);
 	}
@@ -31,30 +29,30 @@ private static Logger log = LoggerFactory.getLogger(Teradata2Hbase.class);
 		BaseMoveDomain srcDto = MoveDtoFactory.createSrcDto(configDto);
 		BaseMoveDomain destDto = MoveDtoFactory.createDestDto(configDto);
 		
-		TeradataDto teradataDto = (TeradataDto)srcDto;
+		OracleDto oracleDto = (OracleDto)srcDto;
 		String sqoopCommand = null;
 		
-		if (StringUtils.isEmpty(teradataDto.getQuerySql()) && StringUtils.isEmpty(teradataDto.getColumns()))
+		if (StringUtils.isEmpty(oracleDto.getQuerySql()) && StringUtils.isEmpty(oracleDto.getColumns()))
 		{
-			sqoopCommand = SqoopUtils.genImportFromTeradataToHbase(srcDto, destDto, true);
+			sqoopCommand = SqoopUtils.genImportFromOralceToHdfs(srcDto, destDto, true);
 		}
 		else
 		{
-			if (StringUtils.isEmpty(teradataDto.getQuerySql()))
+			if (StringUtils.isEmpty(oracleDto.getQuerySql()))
 			{
-				String querySql = "SELECT " + teradataDto.getColumns() + " FROM " + teradataDto.getDatabaseName() + "." + teradataDto.getTableName() + " WHERE \\$CONDITIONS";
-				teradataDto.setQuerySql(querySql);
+				String querySql = "SELECT " + oracleDto.getColumns() + " FROM " + oracleDto.getTableName() + " WHERE \\$CONDITIONS";
+				oracleDto.setQuerySql(querySql);
 			}
 			
-			sqoopCommand = SqoopUtils.genImportFromTeradataToHbase(teradataDto, destDto, false);
+			sqoopCommand = SqoopUtils.genImportFromOralceToHdfs(oracleDto, destDto, false);
 		}
 		
 		
-		log.info("begin to from teradata to hbase");
+		log.info("begin to from oracle to hdfs");
 		String command = sqoopCommand;
 		String res = runCommand(command);
 		log.info("run command res: " + res);
-		log.info("from oracle to teradata finish");
+		log.info("from oracle to hdfs finish");
 	}
 
 	@Override
@@ -63,10 +61,6 @@ private static Logger log = LoggerFactory.getLogger(Teradata2Hbase.class);
 		if (StringUtils.isEmpty(configDto.getSourceTable()))
 		{
 			throw new BaseException("源表名不能为空");
-		}
-		if (StringUtils.isEmpty(configDto.getDestTable()))
-		{
-			throw new BaseException("目的表名不能为空");
 		}
 		if (StringUtils.isEmpty(configDto.getSourceDBIp()))
 		{
@@ -83,6 +77,10 @@ private static Logger log = LoggerFactory.getLogger(Teradata2Hbase.class);
 		if (StringUtils.isEmpty(configDto.getSourceDBPwd()))
 		{
 			throw new BaseException("源数据库密码不能为空");
+		}
+		if (StringUtils.isEmpty(configDto.getDestHdfsLoc()))
+		{
+			throw new BaseException("目的HDFS地址不能为空");
 		}
 	}
 }

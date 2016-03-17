@@ -33,14 +33,19 @@ public class Hdfs2OracleOp extends MoveOpration
 		{
 			throw new BaseException("目的表名不能为空");
 		}
-		if (StringUtils.isEmpty(configDto.getDestDBIp()))
+		
+		if (StringUtils.isEmpty(configDto.getDestDBTns()))
 		{
-			throw new BaseException("目的数据库IP不能为空");
+			if (StringUtils.isEmpty(configDto.getDestDBIp()))
+			{
+				throw new BaseException("目的数据库IP不能为空");
+			}
+			if (StringUtils.isEmpty(configDto.getDestDBName()))
+			{
+				throw new BaseException("目的数据库名不能为空");
+			}
 		}
-		if (StringUtils.isEmpty(configDto.getDestDBName()))
-		{
-			throw new BaseException("目的数据库名不能为空");
-		}
+		
 		if (StringUtils.isEmpty(configDto.getDestDBUserName()))
 		{
 			throw new BaseException("目的数据库用户名不能为空");

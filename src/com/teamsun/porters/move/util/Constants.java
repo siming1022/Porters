@@ -12,6 +12,8 @@ public class Constants
 	
 	public static final String SQOOP_INPUT_NULL_STRING = "'\\\\N'"; 
 	
+	public static final String SQOOP_NULL_STRING = "'\\\\N'"; 
+
 	public static final String SQOOP_NULL_NON_STRING = "'\\\\N'";
 	
 	public static final String DATA_MOVE_TYPE_H2H = "HDFS2HDFS";

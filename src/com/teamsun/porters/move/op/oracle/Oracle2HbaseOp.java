@@ -12,13 +12,13 @@ import com.teamsun.porters.move.op.MoveOpration;
 import com.teamsun.porters.move.util.SqoopUtils;
 import com.teamsun.porters.move.util.StringUtils;
 
-public class Oralce2HdfsOp extends MoveOpration
+public class Oracle2HbaseOp extends MoveOpration
 {
-	private static Logger log = LoggerFactory.getLogger(Oralce2HdfsOp.class);
+	private static Logger log = LoggerFactory.getLogger(Oracle2HbaseOp.class);
 	
-	public Oralce2HdfsOp(){}
+	public Oracle2HbaseOp(){}
 	
-	public Oralce2HdfsOp(String type, ConfigDomain configDto)
+	public Oracle2HbaseOp(String type, ConfigDomain configDto)
 	{
 		super(type, configDto);
 	}
@@ -32,23 +32,27 @@ public class Oralce2HdfsOp extends MoveOpration
 		OracleDto oracleDto = (OracleDto)srcDto;
 		String sqoopCommand = null;
 		
-		if (!StringUtils.isEmpty(oracleDto.getQuerySql()) || StringUtils.isEmpty(oracleDto.getColumns()))
+		if (StringUtils.isEmpty(oracleDto.getQuerySql()) && StringUtils.isEmpty(oracleDto.getColumns()))
 		{
-			sqoopCommand = SqoopUtils.genImportFromOralceToHdfs(srcDto, destDto, true);
+			sqoopCommand = SqoopUtils.genImportFromOralceToHbase(srcDto, destDto, true);
 		}
 		else
 		{
-			String querySql = "SELECT " + oracleDto.getColumns() + " FROM " + oracleDto.getTableName();
-			oracleDto.setQuerySql(querySql);
-			sqoopCommand = SqoopUtils.genImportFromOralceToHdfs(oracleDto, destDto, false);
+			if (StringUtils.isEmpty(oracleDto.getQuerySql()))
+			{
+				String querySql = "SELECT " + oracleDto.getColumns() + " FROM " + oracleDto.getTableName() + " WHERE \\$CONDITIONS";
+				oracleDto.setQuerySql(querySql);
+			}
+			
+			sqoopCommand = SqoopUtils.genImportFromOralceToHbase(oracleDto, destDto, false);
 		}
 		
 		
-		log.info("begin to from oracle to hdfs");
+		log.info("begin to from oracle to hbase");
 		String command = sqoopCommand;
 		String res = runCommand(command);
 		log.info("run command res: " + res);
-		log.info("from oracle to hdfs finish");
+		log.info("from oracle to hbase finish");
 	}
 
 	@Override
@@ -58,14 +62,23 @@ public class Oralce2HdfsOp extends MoveOpration
 		{
 			throw new BaseException("源表名不能为空");
 		}
-		if (StringUtils.isEmpty(configDto.getSourceDBIp()))
+		if (StringUtils.isEmpty(configDto.getDestTable()))
 		{
-			throw new BaseException("源数据库IP不能为空");
+			throw new BaseException("目的表名不能为空");
 		}
-		if (StringUtils.isEmpty(configDto.getSourceDBName()))
+		
+		if (StringUtils.isEmpty(configDto.getSourceDBTns()))
 		{
-			throw new BaseException("源数据库名不能为空");
+			if (StringUtils.isEmpty(configDto.getSourceDBIp()))
+			{
+				throw new BaseException("源数据库IP不能为空");
+			}
+			if (StringUtils.isEmpty(configDto.getSourceDBName()))
+			{
+				throw new BaseException("源数据库名不能为空");
+			}
 		}
+		
 		if (StringUtils.isEmpty(configDto.getSourceDBUserName()))
 		{
 			throw new BaseException("源数据库用户名不能为空");
@@ -73,10 +86,6 @@ public class Oralce2HdfsOp extends MoveOpration
 		if (StringUtils.isEmpty(configDto.getSourceDBPwd()))
 		{
 			throw new BaseException("源数据库密码不能为空");
-		}
-		if (StringUtils.isEmpty(configDto.getDestHdfsLoc()))
-		{
-			throw new BaseException("目的HDFS地址不能为空");
 		}
 	}
 }
