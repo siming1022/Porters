@@ -39,7 +39,7 @@ public class ExcelUtil {
 		
 		if (!in.markSupported()) 
 		{
-			   in = new PushbackInputStream(in, 8);
+			in = new PushbackInputStream(in, 8);
 		}
 		
 		//Excel 2003

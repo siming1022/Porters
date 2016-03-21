@@ -54,7 +54,7 @@ private static Logger log = LoggerFactory.getLogger(Teradata2Hbase.class);
 		String command = sqoopCommand;
 		String res = runCommand(command);
 		log.info("run command res: " + res);
-		log.info("from oracle to teradata finish");
+		log.info("from teradata to hbase finish");
 	}
 
 	@Override

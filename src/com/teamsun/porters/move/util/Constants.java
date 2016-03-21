@@ -28,6 +28,14 @@ public class Constants
 	
 	public static final String DATA_MOVE_TYPE_H2M = "HDFS2MYSQL";
 	
+	public static final String DATA_MOVE_TYPE_T2H = "TERADATA2HDFS";
+	
+	public static final String DATA_MOVE_TYPE_T2HB = "TERADATAHBASE";
+	
+	public static final String DATA_MOVE_TYPE_O2H = "ORACLE2HDFS";
+	
+	public static final String DATA_MOVE_TYPE_O2HB = "ORACLE2HBASE";
+	
 	public static final String DATA_TYPE_HDFS = "HDFS";
 
 	public static final String DATA_TYPE_ORACLE = "ORACLE";

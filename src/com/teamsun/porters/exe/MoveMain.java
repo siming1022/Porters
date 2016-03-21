@@ -15,8 +15,6 @@ import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import javax.annotation.Resource;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,9 +22,7 @@ import com.teamsun.porters.move.domain.conf.ConfigDomain;
 import com.teamsun.porters.move.exception.BaseException;
 import com.teamsun.porters.move.factory.MoveOprationFactory;
 import com.teamsun.porters.move.op.MoveOpration;
-import com.teamsun.porters.move.server.MoveServer;
 import com.teamsun.porters.move.thread.DataMoveThread;
-import com.teamsun.porters.move.util.Constants;
 import com.teamsun.porters.move.util.ExcelUtil;
 import com.teamsun.porters.move.util.StringUtils;
 
@@ -41,11 +37,9 @@ import com.teamsun.porters.move.util.StringUtils;
 public class MoveMain 
 {
 	private static Logger log = LoggerFactory.getLogger(MoveMain.class);
-	private static final String EXCEL_LOCATION = "~/app/file/";
-	private static final int EXEC_COUNT = 50;
-	
-	@Resource
-	private MoveServer moveServer;
+//	private static final String EXCEL_LOCATION = "~/app/file/";
+	private static final String EXCEL_LOCATION = "D://porters";
+	private static final int EXEC_COUNT = 10;
 	
 	public static void main(String[] args) 
 	{
@@ -80,7 +74,7 @@ public class MoveMain
 				try 
 				{
 					is = new FileInputStream(excelFile);
-					List<MoveOpration> oprations = getEntitys(ExcelUtil.readExcel(is, true));
+					List<MoveOpration> oprations = getEntitys(ExcelUtil.readExcel(is, false));
 					
 					int threadCount = oprations.size()%EXEC_COUNT==0?oprations.size()/EXEC_COUNT:(oprations.size()/50)+1;
 					ExecutorService threadPool = Executors.newFixedThreadPool(threadCount);
@@ -130,6 +124,11 @@ public class MoveMain
 				ConfigDomain cd = getConfigDto(config);
 				
 				MoveOpration mo = MoveOprationFactory.create(cd.getType());
+				
+				if (mo == null)
+				{
+					throw new BaseException("can't create moveOpration");
+				}
 				mo.setType(cd.getType());
 				mo.setConfigDto(cd);
 				
@@ -150,7 +149,7 @@ public class MoveMain
 
 	private static ConfigDomain getConfigDto(Map<String, Object> config) throws BaseException
 	{
-		if (StringUtils.isObjEmpty(config.get("dataSouce")))
+		if (StringUtils.isObjEmpty(config.get("dataSource")))
 		{
 			throw new BaseException("请选择数据源");
 		}
@@ -161,12 +160,12 @@ public class MoveMain
 		}
 		
 		ConfigDomain configDomain = new ConfigDomain();
-		String dataSouce = config.get("dataSouce").toString();
+		String dataSource = config.get("dataSource").toString();
 		String dataDest = config.get("dataDest").toString();
 		
 		transMap2Bean(config, configDomain);
 		
-		configDomain.setType(dataSouce.toUpperCase() + "2" + dataDest.toUpperCase());
+		configDomain.setType(dataSource.toUpperCase() + "2" + dataDest.toUpperCase());
 		
 		return configDomain;
 	}

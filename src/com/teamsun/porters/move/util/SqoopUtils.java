@@ -113,15 +113,38 @@ public class SqoopUtils
 		String command = null;
 		if (isAll)
 		{
-			command = MessageFormat.format(SqoopCommandTemplate.SQOOP_ORACLE_2_HBASE,
+			command = MessageFormat.format(SqoopCommandTemplate.SQOOP_TERADATA_2_HBASE,
 					StringUtils.isEmpty(srcDto.getTns())?srcDto.getJdbcUrl():srcDto.getTns(), srcDto.getUserName(), srcDto.getPasswd(), srcDto.getTableName(), destDto.getTableName(),
 					destDto.getColFamily(), Constants.SQOOP_NULL_STRING, Constants.SQOOP_NULL_NON_STRING, destDto.getRowkeys(), "1");
 		}
 		else
 		{
-			command = MessageFormat.format(SqoopCommandTemplate.SQOOP_ORACLE_2_HBASE_BY_SQL,
+			command = MessageFormat.format(SqoopCommandTemplate.SQOOP_TERADATA_2_HBASE_BY_SQL,
 					StringUtils.isEmpty(srcDto.getTns())?srcDto.getJdbcUrl():srcDto.getTns(), srcDto.getUserName(), srcDto.getPasswd(), srcDto.getQuerySql(), destDto.getTableName(),
 					destDto.getColFamily(), Constants.SQOOP_NULL_STRING, Constants.SQOOP_NULL_NON_STRING, destDto.getRowkeys(), "1");
+		}
+		return command;
+	}
+
+	public static String genImportFromTeradataToHdfs(BaseMoveDomain srcMd,	BaseMoveDomain destMd, boolean isAll) 
+	{
+		TeradataDto srcDto = (TeradataDto) srcMd;
+		HdfsDto destDto = (HdfsDto) destMd;
+		
+		String command = null;
+		if (isAll)
+		{
+			command = MessageFormat.format(SqoopCommandTemplate.SQOOP_TERADATA_2_HDFS,
+					srcDto.getDriverClass(), srcDto.getJdbcUrl(), srcDto.getUserName(), srcDto.getPasswd(), 
+					srcDto.getTableName(), destDto.getHdfsLoc(), Constants.SQOOP_NULL_STRING, Constants.SQOOP_NULL_NON_STRING, 
+					"1");
+		}
+		else
+		{
+			command = MessageFormat.format(SqoopCommandTemplate.SQOOP_TERADATA_2_HDFS_BY_SQL,
+					srcDto.getDriverClass(), srcDto.getJdbcUrl(), srcDto.getUserName(), srcDto.getPasswd(), 
+					srcDto.getQuerySql(), destDto.getHdfsLoc(), Constants.SQOOP_NULL_STRING, Constants.SQOOP_NULL_NON_STRING, 
+					"1");
 		}
 		return command;
 	}

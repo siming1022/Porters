@@ -4,12 +4,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.teamsun.porters.move.domain.BaseMoveDomain;
-import com.teamsun.porters.move.domain.TeradataDto;
 import com.teamsun.porters.move.domain.conf.ConfigDomain;
 import com.teamsun.porters.move.exception.BaseException;
 import com.teamsun.porters.move.factory.MoveDtoFactory;
 import com.teamsun.porters.move.op.MoveOpration;
-import com.teamsun.porters.move.server.MoveServer;
 import com.teamsun.porters.move.util.SqoopUtils;
 import com.teamsun.porters.move.util.StringUtils;
 
