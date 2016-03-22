@@ -28,7 +28,7 @@ public class DBMSMetaUtil {
 	 * 
 	 */
 	public static enum DATABASETYPE {
-		ORACLE, MYSQL, SQLSERVER, SQLSERVER2005, DB2, INFORMIX, SYBASE, TERADATA, VERTICA, HIVE, OTHER, EMPTY
+		ORACLE, MYSQL, SQLSERVER, SQLSERVER2005, DB2, INFORMIX, SYBASE, TERADATA, VERTICA, HIVE, HBASE, OTHER, EMPTY
 	}
 
 	/**
@@ -106,7 +106,7 @@ public class DBMSMetaUtil {
 		}
 
 		// HIVE 数据库
-		if (databasetype.contains("HIVE")) {
+		if (databasetype.contains("HIVE") || databasetype.contains("HBASE")) {
 			//
 			return DATABASETYPE.HIVE;
 		}
@@ -139,11 +139,10 @@ public class DBMSMetaUtil {
 			// 数据库
 			String catalog = null;
 			// 数据库的用户
-			String schemaPattern = null;// meta.getUserName();
+			String schemaPattern = "%";// meta.getUserName();
 			// 表名
 			String tableNamePattern = tableName;//
-			// types指的是table、view
-			String[] types = { "TABLE" };
+			String types = "%";
 			// Oracle
 			if (DATABASETYPE.ORACLE.equals(dbtype)) {
 				schemaPattern = username;
@@ -151,41 +150,41 @@ public class DBMSMetaUtil {
 					schemaPattern = schemaPattern.toUpperCase();
 				}
 				// 查询
-				rs = meta.getTables(catalog, schemaPattern, tableNamePattern, types);
+				rs = meta.getColumns(catalog, schemaPattern, tableNamePattern, types);
 			} else if (DATABASETYPE.MYSQL.equals(dbtype)) {
 				// Mysql查询
 				// MySQL 的 table 这一级别查询不到备注信息
 				schemaPattern = dbname;
-				rs = meta.getTables(catalog, schemaPattern, tableNamePattern, types);
+				rs = meta.getColumns(catalog, schemaPattern, tableNamePattern, types);
 			}  else if (DATABASETYPE.SQLSERVER.equals(dbtype) || DATABASETYPE.SQLSERVER2005.equals(dbtype)) {
 				// SqlServer
 				tableNamePattern = "%";
-				rs = meta.getTables(catalog, schemaPattern, tableNamePattern, types);
+				rs = meta.getColumns(catalog, schemaPattern, tableNamePattern, types);
 			}  else if (DATABASETYPE.DB2.equals(dbtype)) {
 				// DB2查询
 				schemaPattern = "jence_user";
 				tableNamePattern = "%";
-				rs = meta.getTables(catalog, schemaPattern, tableNamePattern, types);
+				rs = meta.getColumns(catalog, schemaPattern, tableNamePattern, types);
 			} else if (DATABASETYPE.INFORMIX.equals(dbtype)) {
 				// SqlServer
 				tableNamePattern = "%";
-				rs = meta.getTables(catalog, schemaPattern, tableNamePattern, types);
+				rs = meta.getColumns(catalog, schemaPattern, tableNamePattern, types);
 			} else if (DATABASETYPE.SYBASE.equals(dbtype)) {
 				// SqlServer
 				tableNamePattern = "%";
-				rs = meta.getTables(catalog, schemaPattern, tableNamePattern, types);
+				rs = meta.getColumns(catalog, schemaPattern, tableNamePattern, types);
 			} else if (DATABASETYPE.TERADATA.equals(dbtype)) {
 				// SqlServer
 				tableNamePattern = "%";
-				rs = meta.getTables(catalog, schemaPattern, tableNamePattern, types);
+				rs = meta.getColumns(catalog, schemaPattern, tableNamePattern, types);
 			} else if (DATABASETYPE.VERTICA.equals(dbtype)) {
 				// SqlServer
 				tableNamePattern = "%";
-				rs = meta.getTables(catalog, schemaPattern, tableNamePattern, types);
-			} else if (DATABASETYPE.HIVE.equals(dbtype)) {
+				rs = meta.getColumns(catalog, schemaPattern, tableNamePattern, types);
+			} else if (DATABASETYPE.HIVE.equals(dbtype) || DATABASETYPE.HBASE.equals(dbtype)) {
 				// SqlServer
-				tableNamePattern = "%";
-				rs = meta.getTables(catalog, schemaPattern, tableNamePattern, types);
+//				tableNamePattern = "%";
+				rs = meta.getColumns(catalog, schemaPattern, tableNamePattern, types);
 			}  else {
 				throw new RuntimeException("不认识的数据库类型!");
 			}
@@ -267,7 +266,11 @@ public class DBMSMetaUtil {
 				// SqlServer
 				tableNamePattern = "%";
 				rs = meta.getTables(catalog, schemaPattern, tableNamePattern, types);
-			}  else {
+			}  else if (DATABASETYPE.HIVE.equals(dbtype) || DATABASETYPE.HBASE.equals(dbtype)) {
+				// SqlServer
+				tableNamePattern = "%";
+				rs = meta.getTables(catalog, schemaPattern, tableNamePattern, types);
+			} else {
 				throw new RuntimeException("不认识的数据库类型!");
 			}
 			//
@@ -420,6 +423,11 @@ public class DBMSMetaUtil {
 			url += ip.trim();
 			url += ":5433";
 			url += "/" + dbname;
+		} else if (DATABASETYPE.HIVE.equals(dbtype) || DATABASETYPE.HBASE.equals(dbtype)) {
+			url += "jdbc:hive2://";
+			url += ip.trim();
+			url += ":" + port.trim();
+			url += "/" + (StringUtils.isEmpty(dbname)?"default":dbname);
 		} else {
 			throw new RuntimeException("不认识的数据库类型!");
 		}
@@ -531,21 +539,22 @@ public class DBMSMetaUtil {
 		
 		try 
 		{
-			ResultSetMetaData meta = rs.getMetaData();
-			//
-			int colNum = meta.getColumnCount();
-			//
-			for (int i = 1; i <= colNum; i++) 
+			while (rs.next())
 			{
 				// 列名
-				String name = meta.getColumnLabel(i); // i+1
-				String sqlType = meta.getColumnTypeName(i);
-
-				ColumnsDto colsDto = new ColumnsDto();
-				colsDto.setColumnName(name);
-				colsDto.setSqlType(sqlType);
+				String columnName = rs.getString("COLUMN_NAME");
+				String columnType = rs.getString("TYPE_NAME"); 
+				int datasize = rs.getInt("COLUMN_SIZE"); 
+				int digits = rs.getInt("DECIMAL_DIGITS"); 
+				int nullable = rs.getInt("NULLABLE");
 				
-				tableDto.getColumnList().add(colsDto);
+				System.out.println(columnName+" "+columnType+" "+datasize+" "+digits+" "+ nullable); 
+
+//				ColumnsDto colsDto = new ColumnsDto();
+//				colsDto.setColumnName(name);
+//				colsDto.setSqlType(sqlType);
+//				
+//				tableDto.getColumnList().add(colsDto);
 			}
 		}
 		catch (SQLException e) 

@@ -60,7 +60,7 @@ public class Hdfs2MySqlOp extends MoveOpration
 		BaseMoveDomain srcDto = MoveDtoFactory.createSrcDto(configDto);
 		BaseMoveDomain destDto = MoveDtoFactory.createDestDto(configDto);
 				
-		String sqoopCommand = SqoopUtils.genExportToMySql(srcDto, destDto);
+		String sqoopCommand = SqoopUtils.genExportFromHdfsToMySql(srcDto, destDto);
 		
 		log.info("begin to from hdfs to mysql");
 		String command = sqoopCommand;

@@ -52,7 +52,7 @@ public class Constants
 
 	public static final String DB_DRIVER_CLASS_TERADATA = "com.ncr.teradata.TeraDriver";
 
-	public static final String DB_DRIVER_CLASS_VERTICA = "co m.vertica.jdbc.Driver";
+	public static final String DB_DRIVER_CLASS_VERTICA = "com.vertica.jdbc.Driver";
 
 	public static final String DB_DRIVER_CLASS_MYSQL = "com.mysql.jdbc.Driver";
 

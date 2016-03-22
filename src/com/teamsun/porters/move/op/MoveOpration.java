@@ -3,6 +3,8 @@ package com.teamsun.porters.move.op;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 
+import org.mortbay.log.Log;
+
 import com.teamsun.porters.move.domain.conf.ConfigDomain;
 import com.teamsun.porters.move.exception.BaseException;
 
@@ -42,7 +44,8 @@ public abstract class MoveOpration
 	public String runCommand(String command) throws BaseException
 	{
 		StringBuffer sb = new StringBuffer();
-		BufferedReader reader = null;
+		Log.info(command);
+		/*BufferedReader reader = null;
 		InputStreamReader isr = null;
 		try 
 		{
@@ -78,7 +81,7 @@ public abstract class MoveOpration
 			{
 				e.printStackTrace();
 			}
-		}
+		}*/
 	    
 	    return sb.toString();
 	}

@@ -57,7 +57,7 @@ public class Hdfs2VerticaOp extends MoveOpration
 		BaseMoveDomain srcDto = MoveDtoFactory.createSrcDto(configDto);
 		BaseMoveDomain destDto = MoveDtoFactory.createDestDto(configDto);
 				
-		String sqoopCommand = SqoopUtils.genExportToVertica(srcDto, destDto);
+		String sqoopCommand = SqoopUtils.genExportFromHdfsToVertica(srcDto, destDto);
 		
 		log.info("begin to from hdfs to vertica");
 		String command = sqoopCommand;

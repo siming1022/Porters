@@ -20,8 +20,8 @@ public class SqlUtils
 	public static String genHiveTxtTableSql(HdfsDto srcDto, DBMoveDomain destDto)
 	{
 		
-		StringBuffer sb = new StringBuffer(" drop table if exists TEST." + destDto.getTableName().toUpperCase() + "; \n");
-		
+		StringBuffer sb = new StringBuffer(" drop table if exists " + Constants.HIVE_EXT_DATABASE_NAME + "." + destDto.getTableName().toUpperCase() + "; \n");
+		sb.append("create EXTERNAL table " + Constants.HIVE_EXT_DATABASE_NAME + "." + destDto.getTableName().toUpperCase() + "(");
 		for (ColumnsDto colDto : destDto.getTableDto().getColumnList()) 
         {
     		sb.append(colDto.getColumnName() + " " + changeType(colDto.getSqlType().toUpperCase()) + "," + " \n");
@@ -35,7 +35,7 @@ public class SqlUtils
          *
          **/
         sb.append("ROW FORMAT DELIMITED  " + "\n");
-        sb.append("FIELDS TERMINATED BY \'\\,\'" + "\n");
+        sb.append("FIELDS TERMINATED BY \'\\t\'" + "\n");
         sb.append("STORED AS INPUTFORMAT " + "\n");
         sb.append("'org.apache.hadoop.mapred.TextInputFormat'" + "\n");
         sb.append("OUTPUTFORMAT" + "\n");

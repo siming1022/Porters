@@ -62,7 +62,7 @@ public class Hdfs2OracleOp extends MoveOpration
 		BaseMoveDomain srcDto = MoveDtoFactory.createSrcDto(configDto);
 		BaseMoveDomain destDto = MoveDtoFactory.createDestDto(configDto);
 				
-		String sqoopCommand = SqoopUtils.genExportToOralce(srcDto, destDto);
+		String sqoopCommand = SqoopUtils.genExportFromHdfsToOralce(srcDto, destDto);
 		
 		log.info("begin to from hdfs to oracle");
 		String command = sqoopCommand;

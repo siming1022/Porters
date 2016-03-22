@@ -36,6 +36,7 @@ public class MoveDtoFactory
 			dto.setPasswd(configDto.getSourceDBPwd());
 			dto.setTableName(configDto.getSourceTable());
 			dto.setQuerySql(configDto.getQuerySql());
+			dto.setTns(configDto.getSourceDBTns().replaceAll(" ", "").replaceAll("\n", ""));
 			
 			DATABASETYPE databaseType = DBMSMetaUtil.parseDATABASETYPE(dataSource);
 			dto.setDriverClass(Constants.DB_DRIVER_CLASS_ORACLE);
@@ -72,6 +73,7 @@ public class MoveDtoFactory
 			dto.setUserName(configDto.getDestDBUserName());
 			dto.setPasswd(configDto.getDestDBPwd());
 			dto.setTableName(configDto.getDestTable());
+			dto.setTns(configDto.getDestDBTns().replaceAll(" ", "").replaceAll("\n", ""));
 			
 			DATABASETYPE databaseType = DBMSMetaUtil.parseDATABASETYPE(dataDest);
 			dto.setDriverClass(Constants.DB_DRIVER_CLASS_ORACLE);

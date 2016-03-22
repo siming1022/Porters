@@ -57,7 +57,7 @@ public class Hdfs2TeradataOp extends MoveOpration
 		BaseMoveDomain srcDto = MoveDtoFactory.createSrcDto(configDto);
 		BaseMoveDomain destDto = MoveDtoFactory.createDestDto(configDto);
 		
-		String sqoopCommand = SqoopUtils.genExportToTeradata(srcDto, destDto);
+		String sqoopCommand = SqoopUtils.genExportFromHdfsToTeradata(srcDto, destDto);
 		
 		log.info("begin to from hdfs to teradata");
 		String command = sqoopCommand;

@@ -85,18 +85,6 @@ public class Hdfs2HbaseOp extends MoveOpration
 		{
 			throw new BaseException("目的数据库IP不能为空");
 		}
-		if (StringUtils.isEmpty(configDto.getDestDBName()))
-		{
-			throw new BaseException("目的数据库名不能为空");
-		}
-		if (StringUtils.isEmpty(configDto.getDestDBUserName()))
-		{
-			throw new BaseException("目的数据库用户名不能为空");
-		}
-		if (StringUtils.isEmpty(configDto.getDestDBPwd()))
-		{
-			throw new BaseException("目的数据库密码不能为空");
-		}
 	}
 	
 }

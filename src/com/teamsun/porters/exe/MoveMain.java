@@ -76,15 +76,25 @@ public class MoveMain
 					is = new FileInputStream(excelFile);
 					List<MoveOpration> oprations = getEntitys(ExcelUtil.readExcel(is, false));
 					
-					int threadCount = oprations.size()%EXEC_COUNT==0?oprations.size()/EXEC_COUNT:(oprations.size()/50)+1;
-					ExecutorService threadPool = Executors.newFixedThreadPool(threadCount);
-					
-					for (int i = 0; i < threadCount; i++)
+					if (oprations != null && oprations.size() > 0)
 					{
-						threadPool.execute(new DataMoveThread(oprations.subList(i * EXEC_COUNT, ((i+1) * EXEC_COUNT) - 1)));
+						int threadCount = oprations.size()%EXEC_COUNT==0?oprations.size()/EXEC_COUNT:(oprations.size()/50)+1;
+						ExecutorService threadPool = Executors.newFixedThreadPool(threadCount);
+						
+						for (int i = 0; i < threadCount; i++)
+						{
+							int beginIndex = i * EXEC_COUNT;
+							int endIndex = ((i+1) * EXEC_COUNT) - 1;
+							endIndex = endIndex>=oprations.size()?oprations.size():endIndex;
+							threadPool.execute(new DataMoveThread(oprations.subList(beginIndex, endIndex)));
+						}
+						
+						threadPool.shutdown();
 					}
-					
-					threadPool.shutdown();
+					else
+					{
+						log.error("没有需要执行的操作");
+					}
 				}
 				catch (Exception e) 
 				{
@@ -123,24 +133,28 @@ public class MoveMain
 			{
 				ConfigDomain cd = getConfigDto(config);
 				
-				MoveOpration mo = MoveOprationFactory.create(cd.getType());
-				
-				if (mo == null)
+				if (cd != null)
 				{
-					throw new BaseException("can't create moveOpration");
+					MoveOpration mo = MoveOprationFactory.create(cd.getType());
+					
+					if (mo == null)
+					{
+						throw new BaseException("this type " + cd.getType() + " can't create moveOpration");
+					}
+					
+					mo.setType(cd.getType());
+					mo.setConfigDto(cd);
+					
+					//对Excel里的参数进行验证，如果验证出错，会抛出异常
+					mo.valid();
+					
+					moveOps.add(mo);
 				}
-				mo.setType(cd.getType());
-				mo.setConfigDto(cd);
-				
-				//对Excel里的参数进行验证，如果验证出错，会抛出异常
-				mo.valid();
-				
-				moveOps.add(mo);
 			} 
 			catch (BaseException e) 
 			{
 				e.printStackTrace();
-				log.error("valid excel data error, index: " + (i + 1) + ", data: " + config.toString() + " error: " + e.getMessage());
+				log.error("valid excel data error, index: " + i + ", data: " + config.toString() + " error: " + e.getMessage());
 			}
 		}
 		
@@ -149,6 +163,12 @@ public class MoveMain
 
 	private static ConfigDomain getConfigDto(Map<String, Object> config) throws BaseException
 	{
+		//加此判断是因为Excel中第一列是类型枚举
+		if (StringUtils.isObjEmpty(config.get("dataSource")) && StringUtils.isObjEmpty(config.get("dataDest")))
+		{
+			return null;
+		}
+
 		if (StringUtils.isObjEmpty(config.get("dataSource")))
 		{
 			throw new BaseException("请选择数据源");
