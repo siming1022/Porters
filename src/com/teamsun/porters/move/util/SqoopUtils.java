@@ -71,13 +71,15 @@ public class SqoopUtils
 		{
 			command = MessageFormat.format(SqoopCommandTemplate.SQOOP_ORACLE_2_HDFS,
 					StringUtils.isEmpty(srcDto.getTns())?srcDto.getJdbcUrl():srcDto.getTns(), srcDto.getUserName(), srcDto.getPasswd(), srcDto.getTableName(), destDto.getHdfsLoc(),
-					StringUtils.getValue(destDto.getInputNullString(), Constants.SQOOP_INPUT_NULL_STRING), StringUtils.getValue(destDto.getNullNonString(), Constants.SQOOP_NULL_NON_STRING), "1");
+					StringUtils.getValue(destDto.getInputNullString(), Constants.SQOOP_INPUT_NULL_STRING), StringUtils.getValue(destDto.getNullNonString(), Constants.SQOOP_NULL_NON_STRING), 
+					Constants.SQOOP_FIELDS_TERMINATED_BY, "1");
 		}
 		else
 		{
 			command = MessageFormat.format(SqoopCommandTemplate.SQOOP_ORACLE_2_HDFS_BY_SQL,
 					StringUtils.isEmpty(srcDto.getTns())?srcDto.getJdbcUrl():srcDto.getTns(), srcDto.getUserName(), srcDto.getPasswd(), srcDto.getQuerySql(), destDto.getHdfsLoc(),
-					StringUtils.getValue(destDto.getInputNullString(), Constants.SQOOP_INPUT_NULL_STRING), StringUtils.getValue(destDto.getNullNonString(), Constants.SQOOP_NULL_NON_STRING), "1");
+					StringUtils.getValue(destDto.getInputNullString(), Constants.SQOOP_INPUT_NULL_STRING), StringUtils.getValue(destDto.getNullNonString(), Constants.SQOOP_NULL_NON_STRING), 
+					Constants.SQOOP_FIELDS_TERMINATED_BY, "1");
 		}
 		
 		return command;
@@ -136,14 +138,14 @@ public class SqoopUtils
 			command = MessageFormat.format(SqoopCommandTemplate.SQOOP_TERADATA_2_HDFS,
 					srcDto.getDriverClass(), srcDto.getJdbcUrl(), srcDto.getUserName(), srcDto.getPasswd(), 
 					srcDto.getTableName(), destDto.getHdfsLoc(), Constants.SQOOP_NULL_STRING, Constants.SQOOP_NULL_NON_STRING, 
-					"1");
+					Constants.SQOOP_FIELDS_TERMINATED_BY, "1");
 		}
 		else
 		{
 			command = MessageFormat.format(SqoopCommandTemplate.SQOOP_TERADATA_2_HDFS_BY_SQL,
 					srcDto.getDriverClass(), srcDto.getJdbcUrl(), srcDto.getUserName(), srcDto.getPasswd(), 
 					srcDto.getQuerySql(), destDto.getHdfsLoc(), Constants.SQOOP_NULL_STRING, Constants.SQOOP_NULL_NON_STRING, 
-					"1");
+					Constants.SQOOP_FIELDS_TERMINATED_BY, "1");
 		}
 		return command;
 	}

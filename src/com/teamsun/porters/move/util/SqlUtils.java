@@ -24,7 +24,10 @@ public class SqlUtils
 		sb.append("create EXTERNAL table " + Constants.HIVE_EXT_DATABASE_NAME_TEST + "." + destDto.getTableName().toUpperCase() + "(");
 		for (ColumnsDto colDto : destDto.getTableDto().getColumnList()) 
         {
-    		sb.append(colDto.getColumnName() + " " + changeType(colDto.getSqlType().toUpperCase()) + "," + " \n");
+			if (!colDto.getSqlType().startsWith("struct<") && !colDto.getSqlType().endsWith(">"))
+			{
+				sb.append(colDto.getColumnName() + " " + changeType(colDto.getSqlType().toUpperCase()) + "," + " \n");
+			}
         }
         
         sb = new StringBuffer(sb.substring(0, sb.length() - 3));

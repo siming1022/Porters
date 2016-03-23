@@ -47,6 +47,27 @@ public class MoveDtoFactory
 			
 			return dto;
 		}
+		else if (Constants.DATA_TYPE_TERADATA.equals(dataSource))
+		{
+			TeradataDto dto = new TeradataDto();
+			dto.setDatabaseName(configDto.getSourceDBName());
+			dto.setIp(configDto.getSourceDBIp());
+			dto.setPort(configDto.getSourceDBPort());
+			dto.setUserName(configDto.getSourceDBUserName());
+			dto.setPasswd(configDto.getSourceDBPwd());
+			dto.setTableName(configDto.getSourceTable());
+			dto.setQuerySql(configDto.getQuerySql());
+			dto.setColumns(configDto.getColumns());
+			
+			DATABASETYPE databaseType = DBMSMetaUtil.parseDATABASETYPE(dataSource);
+			dto.setDriverClass(Constants.DB_DRIVER_CLASS_TERADATA);
+			String jdbcUrl = StringUtils.isEmpty(dto.getTns())?DBMSMetaUtil.concatDBURL(databaseType, configDto.getSourceDBIp(), configDto.getSourceDBPort(), configDto.getSourceDBName()):dto.getTns();
+			dto.setJdbcUrl(jdbcUrl);
+			dto.setTableDto(DBMSMetaUtil.getTableDto(databaseType, Constants.DB_DRIVER_CLASS_TERADATA, configDto.getSourceDBIp(), configDto.getSourceDBPort(), configDto.getSourceDBName()
+			, configDto.getSourceDBUserName(), configDto.getSourceDBPwd(), configDto.getSourceTable()));
+			
+			return dto;
+		}
 		else
 		{
 			return null;

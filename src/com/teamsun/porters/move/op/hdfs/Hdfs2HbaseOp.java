@@ -50,14 +50,14 @@ public class Hdfs2HbaseOp extends MoveOpration
 			stm.executeUpdate(deleteExtTableSql);
 			
 			String createExtTableSql = SqlUtils.genHiveTxtTableSql(srcDto, destDto);
-			System.out.println(createExtTableSql);
+//			System.out.println(createExtTableSql);
 			stm.executeUpdate(createExtTableSql);
 			
 			String bulkloadCommand = SqlUtils.getBulkloadSql(destDto);
 
-			System.out.println(bulkloadCommand);
+//			System.out.println(bulkloadCommand);
 			stm.executeUpdate(bulkloadCommand);
-			System.out.println(deleteExtTableSql);
+//			System.out.println(deleteExtTableSql);
 			stm.executeUpdate(deleteExtTableSql);
 			
 			conn.commit();

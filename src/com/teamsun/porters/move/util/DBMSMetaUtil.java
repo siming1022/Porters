@@ -174,8 +174,7 @@ public class DBMSMetaUtil {
 				tableNamePattern = "%";
 				rs = meta.getColumns(catalog, schemaPattern, tableNamePattern, types);
 			} else if (DATABASETYPE.TERADATA.equals(dbtype)) {
-				// SqlServer
-				tableNamePattern = "%";
+				schemaPattern = dbname;
 				rs = meta.getColumns(catalog, schemaPattern, tableNamePattern, types);
 			} else if (DATABASETYPE.VERTICA.equals(dbtype)) {
 				// SqlServer
@@ -183,7 +182,6 @@ public class DBMSMetaUtil {
 				rs = meta.getColumns(catalog, schemaPattern, tableNamePattern, types);
 			} else if (DATABASETYPE.HIVE.equals(dbtype) || DATABASETYPE.HBASE.equals(dbtype)) {
 				// SqlServer
-//				tableNamePattern = "%";
 				schemaPattern = StringUtils.getValue(dbname, Constants.HIVE_EXT_DATABASE_NAME_PDATA);
 				rs = meta.getColumns(catalog, schemaPattern, tableNamePattern, types);
 			}  else {
