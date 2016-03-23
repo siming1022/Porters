@@ -38,7 +38,7 @@ public class MoveMain
 {
 	private static Logger log = LoggerFactory.getLogger(MoveMain.class);
 //	private static final String EXCEL_LOCATION = "~/app/file/";
-	private static final String EXCEL_LOCATION = "D://porters";
+	private static final String EXCEL_LOCATION = "C://zsm//porters";
 	private static final int EXEC_COUNT = 10;
 	
 	public static void main(String[] args) 

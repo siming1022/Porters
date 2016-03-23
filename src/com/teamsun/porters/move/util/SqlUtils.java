@@ -19,9 +19,9 @@ public class SqlUtils
 {
 	public static String genHiveTxtTableSql(HdfsDto srcDto, DBMoveDomain destDto)
 	{
-		
-		StringBuffer sb = new StringBuffer(" drop table if exists " + Constants.HIVE_EXT_DATABASE_NAME + "." + destDto.getTableName().toUpperCase() + "; \n");
-		sb.append("create EXTERNAL table " + Constants.HIVE_EXT_DATABASE_NAME + "." + destDto.getTableName().toUpperCase() + "(");
+		//" drop table if exists " + Constants.HIVE_EXT_DATABASE_NAME + "." + destDto.getTableName().toUpperCase() + "; \n"
+		StringBuffer sb = new StringBuffer();
+		sb.append("create EXTERNAL table " + Constants.HIVE_EXT_DATABASE_NAME_TEST + "." + destDto.getTableName().toUpperCase() + "(");
 		for (ColumnsDto colDto : destDto.getTableDto().getColumnList()) 
         {
     		sb.append(colDto.getColumnName() + " " + changeType(colDto.getSqlType().toUpperCase()) + "," + " \n");
@@ -46,18 +46,36 @@ public class SqlUtils
 		return sb.toString();
 	}
 	
-	public static String getBulkloadSql(DBMoveDomain dto)
+	public static String getBulkloadSql(DBMoveDomain dbDto)
 	{
-		StringBuffer sb = new StringBuffer("insert into " + dto.getDatabaseName() + "." + dto.getTableName() + " SELECT /*+USE_BULKLOAD*/ ");
+		HbaseDto dto = (HbaseDto) dbDto;
+		StringBuffer sb = new StringBuffer("insert into " + StringUtils.getValue(dto.getDatabaseName(), Constants.HIVE_EXT_DATABASE_NAME_PDATA) + "." + dto.getTableName() + " SELECT /*+USE_BULKLOAD*/ ");
 		
 		for (ColumnsDto colDto : dto.getTableDto().getColumnList())
 		{
-			sb.append(colDto.getColumnName() + ", ");
+			if (colDto.getSqlType().startsWith("struct<") && colDto.getSqlType().endsWith(">"))
+			{
+				String[] keys = colDto.getSqlType().substring(7, colDto.getSqlType().length() - 1).split(",");
+				sb.append("named_struct(");
+				for (String keyCol : keys)
+				{
+					String colName = keyCol.split(":")[0];
+					sb.append("'" + colName + "'," + colName + ",");
+				}
+				
+				sb = new StringBuffer(sb.substring(0, sb.length() - 1));
+				sb.append(") AS KEY, ");
+			}
+			else
+			{
+				sb.append(colDto.getColumnName() + ", ");
+			}
 		}
 		
 		sb = new StringBuffer(sb.toString().substring(0, sb.length() - 2));
 		
 		sb.append(" FROM TEST." + dto.getTableName());
+		sb.append(" ORDER BY KEY");
 		
 		return sb.toString();
 	}
@@ -84,6 +102,6 @@ public class SqlUtils
 
 	public static String genDelHiveTxtTableSql(DBMoveDomain destDto) 
 	{
-		return MessageFormat.format(SqlTemplate.HIVE_DROP_TABLE_SQL, Constants.HIVE_EXT_DATABASE_NAME, destDto.getTableName());
+		return MessageFormat.format(SqlTemplate.HIVE_DROP_TABLE_SQL, Constants.HIVE_EXT_DATABASE_NAME_TEST, destDto.getTableName());
 	}
 }

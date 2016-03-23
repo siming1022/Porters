@@ -139,10 +139,10 @@ public class DBMSMetaUtil {
 			// 数据库
 			String catalog = null;
 			// 数据库的用户
-			String schemaPattern = "%";// meta.getUserName();
+			String schemaPattern =null;// meta.getUserName();
 			// 表名
 			String tableNamePattern = tableName;//
-			String types = "%";
+			String types = null;
 			// Oracle
 			if (DATABASETYPE.ORACLE.equals(dbtype)) {
 				schemaPattern = username;
@@ -184,6 +184,7 @@ public class DBMSMetaUtil {
 			} else if (DATABASETYPE.HIVE.equals(dbtype) || DATABASETYPE.HBASE.equals(dbtype)) {
 				// SqlServer
 //				tableNamePattern = "%";
+				schemaPattern = StringUtils.getValue(dbname, Constants.HIVE_EXT_DATABASE_NAME_PDATA);
 				rs = meta.getColumns(catalog, schemaPattern, tableNamePattern, types);
 			}  else {
 				throw new RuntimeException("不认识的数据库类型!");
@@ -545,16 +546,13 @@ public class DBMSMetaUtil {
 				String columnName = rs.getString("COLUMN_NAME");
 				String columnType = rs.getString("TYPE_NAME"); 
 				int datasize = rs.getInt("COLUMN_SIZE"); 
-				int digits = rs.getInt("DECIMAL_DIGITS"); 
-				int nullable = rs.getInt("NULLABLE");
 				
-				System.out.println(columnName+" "+columnType+" "+datasize+" "+digits+" "+ nullable); 
-
-//				ColumnsDto colsDto = new ColumnsDto();
-//				colsDto.setColumnName(name);
-//				colsDto.setSqlType(sqlType);
-//				
-//				tableDto.getColumnList().add(colsDto);
+				ColumnsDto colsDto = new ColumnsDto();
+				colsDto.setColumnName(columnName);
+				colsDto.setSqlType(columnType);
+				colsDto.setColumnSize(datasize);
+				
+				tableDto.getColumnList().add(colsDto);
 			}
 		}
 		catch (SQLException e) 

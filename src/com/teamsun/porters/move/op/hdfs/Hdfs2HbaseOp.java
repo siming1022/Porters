@@ -39,22 +39,26 @@ public class Hdfs2HbaseOp extends MoveOpration
 		ResultSet rs = null;
 		try 
 		{
+			
 			HdfsDto srcDto = (HdfsDto) MoveDtoFactory.createSrcDto(configDto);
 			HbaseDto destDto = (HbaseDto) MoveDtoFactory.createDestDto(configDto);
 			
-			String createExtTableSql = SqlUtils.genHiveTxtTableSql(srcDto, destDto);
 			conn = DBMSMetaUtil.getConnection(destDto.getDriverClass(), destDto.getJdbcUrl(), destDto.getUserName(), destDto.getPasswd());
-			stm = conn.createStatement();
-			rs = stm.executeQuery(createExtTableSql);
-			
-			String bulkloadCommand = SqlUtils.getBulkloadSql(destDto);
-
-			stm = conn.createStatement();
-			rs = stm.executeQuery(bulkloadCommand);
 			
 			String deleteExtTableSql = SqlUtils.genDelHiveTxtTableSql(destDto);
 			stm = conn.createStatement();
-			rs = stm.executeQuery(deleteExtTableSql);
+			stm.executeUpdate(deleteExtTableSql);
+			
+			String createExtTableSql = SqlUtils.genHiveTxtTableSql(srcDto, destDto);
+			System.out.println(createExtTableSql);
+			stm.executeUpdate(createExtTableSql);
+			
+			String bulkloadCommand = SqlUtils.getBulkloadSql(destDto);
+
+			System.out.println(bulkloadCommand);
+			stm.executeUpdate(bulkloadCommand);
+			System.out.println(deleteExtTableSql);
+			stm.executeUpdate(deleteExtTableSql);
 			
 			conn.commit();
 		}

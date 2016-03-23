@@ -5,6 +5,14 @@ public class ColumnsDto
 	private String columnName; 
     private String columnComment; 
     private String SqlType;
+    private int columnSize;
+    
+	public int getColumnSize() {
+		return columnSize;
+	}
+	public void setColumnSize(int columnSize) {
+		this.columnSize = columnSize;
+	}
 	public String getColumnName() {
 		return columnName;
 	}

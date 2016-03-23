@@ -58,6 +58,10 @@ public class Constants
 
 	public static final String DB_DRIVER_CLASS_HIVE = "org.apache.hive.jdbc.HiveDriver";
 	
-	public static final String HIVE_EXT_DATABASE_NAME = "TEST";
+	public static final String HIVE_EXT_DATABASE_NAME_TEST = "TEST";
+	
+	public static final String HIVE_EXT_DATABASE_NAME_PDATA = "EMS_PDATA";
+	
+	public static final String HBASE_ROWKEY_SPLIT = "~";
 
 }
