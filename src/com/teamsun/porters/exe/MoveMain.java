@@ -12,6 +12,7 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -25,6 +26,7 @@ import com.teamsun.porters.move.op.MoveOpration;
 import com.teamsun.porters.move.thread.DataMoveThread;
 import com.teamsun.porters.move.util.ExcelUtil;
 import com.teamsun.porters.move.util.StringUtils;
+import com.teamsun.porters.move.util.Utils;
 
 
 /**
@@ -37,6 +39,8 @@ import com.teamsun.porters.move.util.StringUtils;
 public class MoveMain 
 {
 	private static Logger log = LoggerFactory.getLogger(MoveMain.class);
+	public static Properties configPro = Utils.getPropertiesFromFile("config.properties");
+	
 //	private static final String EXCEL_LOCATION = "~/app/file/";
 	private static final String EXCEL_LOCATION = "C://zsm//porters";
 	private static final int EXEC_COUNT = 10;

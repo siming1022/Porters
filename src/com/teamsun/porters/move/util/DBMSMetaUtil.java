@@ -128,10 +128,11 @@ public class DBMSMetaUtil {
 		tableName = trim(tableName);
 		//
 		String url = concatDBURL(dbtype, ip, port, dbname);
-		Connection conn = getConnection(driverClass, url, username, password);
+		Connection conn = null;
 		ResultSet rs = null;
 		//
 		try {
+			conn = getConnection(driverClass, url, username, password);
 			// 这句话我也不懂是什么意思... 好像没什么用
 			conn.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE,ResultSet.CONCUR_READ_ONLY);
 			// 获取Meta信息对象

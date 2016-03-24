@@ -26,7 +26,14 @@ public class ConfigDomain extends BaseMoveDomain
 	private String columns;
 	private String sourceDBTns;
 	private String destDBTns;
+	private String destTableColFamily;
 	
+	public String getDestTableColFamily() {
+		return destTableColFamily;
+	}
+	public void setDestTableColFamily(String destTableColFamily) {
+		this.destTableColFamily = destTableColFamily;
+	}
 	public String getSourceDBTns() {
 		return sourceDBTns;
 	}

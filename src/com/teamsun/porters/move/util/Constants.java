@@ -30,7 +30,7 @@ public class Constants
 	
 	public static final String DATA_MOVE_TYPE_T2H = "TERADATA2HDFS";
 	
-	public static final String DATA_MOVE_TYPE_T2HB = "TERADATAHBASE";
+	public static final String DATA_MOVE_TYPE_T2HB = "TERADATA2HBASE";
 	
 	public static final String DATA_MOVE_TYPE_O2H = "ORACLE2HDFS";
 	
@@ -64,4 +64,5 @@ public class Constants
 	
 	public static final String HBASE_ROWKEY_SPLIT = "~";
 
+	public static final String CONFIG_HBASE_ROWKEY_PROTECTED = "hbase.rowkey.protected";
 }

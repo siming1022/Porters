@@ -115,14 +115,14 @@ public class SqoopUtils
 		if (isAll)
 		{
 			command = MessageFormat.format(SqoopCommandTemplate.SQOOP_TERADATA_2_HBASE,
-					StringUtils.isEmpty(srcDto.getTns())?srcDto.getJdbcUrl():srcDto.getTns(), srcDto.getUserName(), srcDto.getPasswd(), srcDto.getTableName(), destDto.getTableName(),
-					destDto.getColFamily(), Constants.SQOOP_NULL_STRING, Constants.SQOOP_NULL_NON_STRING, destDto.getRowkeys(), "1");
+					Constants.DB_DRIVER_CLASS_TERADATA, srcDto.getJdbcUrl(), srcDto.getUserName(), srcDto.getPasswd(), srcDto.getTableName(), destDto.getTableName(),
+					destDto.getColFamily(), Constants.SQOOP_NULL_STRING, Constants.SQOOP_NULL_NON_STRING, "1");
 		}
 		else
 		{
 			command = MessageFormat.format(SqoopCommandTemplate.SQOOP_TERADATA_2_HBASE_BY_SQL,
-					StringUtils.isEmpty(srcDto.getTns())?srcDto.getJdbcUrl():srcDto.getTns(), srcDto.getUserName(), srcDto.getPasswd(), srcDto.getQuerySql(), destDto.getTableName(),
-					destDto.getColFamily(), Constants.SQOOP_NULL_STRING, Constants.SQOOP_NULL_NON_STRING, destDto.getRowkeys(), "1");
+					Constants.DB_DRIVER_CLASS_TERADATA, srcDto.getJdbcUrl(), srcDto.getUserName(), srcDto.getPasswd(), srcDto.getQuerySql(), destDto.getTableName(),
+					destDto.getColFamily(), Constants.SQOOP_NULL_STRING, Constants.SQOOP_NULL_NON_STRING, "1");
 		}
 		return command;
 	}

@@ -3,14 +3,16 @@ package com.teamsun.porters.move.op.teradata;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.teamsun.porters.exe.MoveMain;
 import com.teamsun.porters.move.domain.BaseMoveDomain;
-import com.teamsun.porters.move.domain.OracleDto;
+import com.teamsun.porters.move.domain.HbaseDto;
 import com.teamsun.porters.move.domain.TeradataDto;
 import com.teamsun.porters.move.domain.conf.ConfigDomain;
+import com.teamsun.porters.move.domain.table.ColumnsDto;
 import com.teamsun.porters.move.exception.BaseException;
 import com.teamsun.porters.move.factory.MoveDtoFactory;
 import com.teamsun.porters.move.op.MoveOpration;
-import com.teamsun.porters.move.op.oracle.Oracle2HbaseOp;
+import com.teamsun.porters.move.util.Constants;
 import com.teamsun.porters.move.util.SqoopUtils;
 import com.teamsun.porters.move.util.StringUtils;
 
@@ -32,17 +34,53 @@ private static Logger log = LoggerFactory.getLogger(Teradata2Hbase.class);
 		BaseMoveDomain destDto = MoveDtoFactory.createDestDto(configDto);
 		
 		TeradataDto teradataDto = (TeradataDto)srcDto;
+		HbaseDto hbaseDto = (HbaseDto) destDto;
 		String sqoopCommand = null;
+		
+		String[] rowkeyCols = hbaseDto.getRowkeys().split(",");
+		String rowkeyCol = "";
+		boolean isProtectRowkey = Boolean.parseBoolean(MoveMain.configPro.get(Constants.CONFIG_HBASE_ROWKEY_PROTECTED).toString());
+		for (String rowkeyColTmp : rowkeyCols)
+		{
+			if (isProtectRowkey)
+			{
+				rowkeyColTmp = "COALESCE(" + rowkeyColTmp + ", '" + rowkeyColTmp + "_NULL')";
+			}
+			rowkeyCol += rowkeyColTmp + " || '" + Constants.HBASE_ROWKEY_SPLIT + "' || ";
+		}
+		
+		rowkeyCol = rowkeyCol.substring(0, rowkeyCol.length() - 11) + " AS ROWKEY";
 		
 		if (StringUtils.isEmpty(teradataDto.getQuerySql()) && StringUtils.isEmpty(teradataDto.getColumns()))
 		{
-			sqoopCommand = SqoopUtils.genImportFromTeradataToHbase(srcDto, destDto, true);
+			StringBuffer querySql = new StringBuffer("SELECT ");
+			for (ColumnsDto colDto : teradataDto.getTableDto().getColumnList())
+			{
+				querySql.append(colDto.getColumnName() + " AS " + colDto.getColumnName().toUpperCase() + ", ");
+			}
+			
+			querySql.append(rowkeyCol);
+			querySql.append(" FROM " + teradataDto.getDatabaseName() + "." + teradataDto.getTableName());
+			querySql.append("  WHERE \\$CONDITIONS ");
+			
+			teradataDto.setQuerySql(querySql.toString());
+			
+			sqoopCommand = SqoopUtils.genImportFromTeradataToHbase(srcDto, destDto, false);
 		}
 		else
 		{
 			if (StringUtils.isEmpty(teradataDto.getQuerySql()))
 			{
-				String querySql = "SELECT " + teradataDto.getColumns() + " FROM " + teradataDto.getDatabaseName() + "." + teradataDto.getTableName() + " WHERE \\$CONDITIONS";
+				String columns = "";
+				
+				String[] colArr = teradataDto.getColumns().split(",");
+				
+				for (String columnTmp : colArr)
+				{
+					columns += columnTmp + " AS " + columnTmp.toUpperCase() + ", ";
+				}
+				
+				String querySql = "SELECT " + columns + rowkeyCol + " FROM " + teradataDto.getDatabaseName() + "." + teradataDto.getTableName() + " WHERE \\$CONDITIONS";
 				teradataDto.setQuerySql(querySql);
 			}
 			
@@ -67,6 +105,14 @@ private static Logger log = LoggerFactory.getLogger(Teradata2Hbase.class);
 		if (StringUtils.isEmpty(configDto.getDestTable()))
 		{
 			throw new BaseException("目的表名不能为空");
+		}
+		if (StringUtils.isEmpty(configDto.getDestTableRowkey()))
+		{
+			throw new BaseException("目的表Rowkey不能为空");
+		}
+		if (StringUtils.isEmpty(configDto.getDestTableColFamily()))
+		{
+			throw new BaseException("目的表列簇不能为空");
 		}
 		if (StringUtils.isEmpty(configDto.getSourceDBIp()))
 		{

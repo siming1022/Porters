@@ -157,13 +157,17 @@ public class MoveDtoFactory
 			dto.setPasswd(configDto.getDestDBPwd());
 			dto.setTableName(configDto.getDestTable());
 			dto.setRowkeys(configDto.getDestTableRowkey());
+			dto.setColFamily(configDto.getDestTableColFamily());
 			
-			DATABASETYPE databaseType = DBMSMetaUtil.parseDATABASETYPE(dataDest);
-			dto.setDriverClass(Constants.DB_DRIVER_CLASS_HIVE);
-			String jdbcUrl = StringUtils.isEmpty(dto.getTns())?DBMSMetaUtil.concatDBURL(databaseType, configDto.getDestDBIp(), configDto.getDestDBPort(), configDto.getDestDBName()):dto.getTns();
-			dto.setJdbcUrl(jdbcUrl);
-			dto.setTableDto(DBMSMetaUtil.getTableDto(databaseType, Constants.DB_DRIVER_CLASS_HIVE, configDto.getDestDBIp(), configDto.getDestDBPort(), configDto.getDestDBName()
-					, configDto.getDestDBUserName(), configDto.getDestDBPwd(), configDto.getDestTable()));
+			if (!StringUtils.isEmpty(configDto.getDestDBIp()))
+			{
+				DATABASETYPE databaseType = DBMSMetaUtil.parseDATABASETYPE(dataDest);
+				dto.setDriverClass(Constants.DB_DRIVER_CLASS_HIVE);
+				String jdbcUrl = StringUtils.isEmpty(dto.getTns())?DBMSMetaUtil.concatDBURL(databaseType, configDto.getDestDBIp(), configDto.getDestDBPort(), configDto.getDestDBName()):dto.getTns();
+				dto.setJdbcUrl(jdbcUrl);
+				dto.setTableDto(DBMSMetaUtil.getTableDto(databaseType, Constants.DB_DRIVER_CLASS_HIVE, configDto.getDestDBIp(), configDto.getDestDBPort(), configDto.getDestDBName()
+						, configDto.getDestDBUserName(), configDto.getDestDBPwd(), configDto.getDestTable()));
+			}
 			
 			return dto;
 		}
