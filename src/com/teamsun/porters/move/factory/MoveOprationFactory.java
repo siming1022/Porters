@@ -53,7 +53,7 @@ public class MoveOprationFactory
 		{
 			return new Oracle2HdfsOp();
 		}
-		else if (Constants.DATA_MOVE_TYPE_H2M.equals(type))
+		else if (Constants.DATA_MOVE_TYPE_O2HB.equals(type))
 		{
 			return new Oracle2HbaseOp();
 		}

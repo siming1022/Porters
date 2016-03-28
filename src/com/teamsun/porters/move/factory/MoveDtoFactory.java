@@ -37,6 +37,7 @@ public class MoveDtoFactory
 			dto.setTableName(configDto.getSourceTable());
 			dto.setQuerySql(configDto.getQuerySql());
 			dto.setTns(configDto.getSourceDBTns().replaceAll(" ", "").replaceAll("\n", ""));
+			dto.setColumns(configDto.getColumns());
 			
 			DATABASETYPE databaseType = DBMSMetaUtil.parseDATABASETYPE(dataSource);
 			dto.setDriverClass(Constants.DB_DRIVER_CLASS_ORACLE);

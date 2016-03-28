@@ -194,7 +194,7 @@ public class MoveMain
 		return configDomain;
 	}
 
-	public static void transMap2Bean(Map<String, Object> map, Object obj) 
+	public static void transMap2Bean(Map<String, Object> map, Object obj) throws BaseException
 	{
 		try 
 		{
@@ -204,7 +204,6 @@ public class MoveMain
 			for (PropertyDescriptor property : propertyDescriptors) 
 			{
 				String key = property.getName();
-
 				if (map.containsKey(key)) 
 				{
 					Object value = map.get(key);
@@ -217,7 +216,8 @@ public class MoveMain
 		} 
 		catch (Exception e) 
 		{
-			log.error("transMap2Bean Error " + e);
+			e.printStackTrace();
+			throw new BaseException(e.getMessage());
 		}
 
 		return;
