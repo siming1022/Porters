@@ -1,14 +1,25 @@
 package com.teamsun.porters.move.op.hdfs;
 
+import java.io.IOException;
+
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.io.IntWritable;
+import org.apache.hadoop.io.Text;
+import org.apache.hadoop.mapreduce.Job;
+import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
+import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.teamsun.porters.exe.MoveMain;
 import com.teamsun.porters.move.domain.BaseMoveDomain;
+import com.teamsun.porters.move.domain.HdfsDto;
 import com.teamsun.porters.move.domain.conf.ConfigDomain;
 import com.teamsun.porters.move.exception.BaseException;
 import com.teamsun.porters.move.factory.MoveDtoFactory;
+import com.teamsun.porters.move.mapper.DataMoveMapper;
 import com.teamsun.porters.move.op.MoveOpration;
-import com.teamsun.porters.move.util.SqoopUtils;
 import com.teamsun.porters.move.util.StringUtils;
 
 public class Hdfs2TeradataOp extends MoveOpration
@@ -57,6 +68,16 @@ public class Hdfs2TeradataOp extends MoveOpration
 		BaseMoveDomain srcDto = MoveDtoFactory.createSrcDto(configDto);
 		BaseMoveDomain destDto = MoveDtoFactory.createDestDto(configDto);
 		
+		log.info("begin to from hdfs to teradata");
+		runMapReduce(srcDto, destDto);
+		log.info("from hdfs to teradata finish");
+	}
+
+	/*public void move() throws BaseException 
+	{
+		BaseMoveDomain srcDto = MoveDtoFactory.createSrcDto(configDto);
+		BaseMoveDomain destDto = MoveDtoFactory.createDestDto(configDto);
+		
 		String sqoopCommand = SqoopUtils.genExportFromHdfsToTeradata(srcDto, destDto);
 		
 		log.info("begin to from hdfs to teradata");
@@ -64,5 +85,5 @@ public class Hdfs2TeradataOp extends MoveOpration
 		String res = runCommand(command);
 		log.info("run command res: " + res);
 		log.info("from hdfs to teradata finish");
-	}
+	}*/
 }

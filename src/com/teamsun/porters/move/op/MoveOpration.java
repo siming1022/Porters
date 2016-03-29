@@ -1,12 +1,23 @@
 package com.teamsun.porters.move.op;
 
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
+import java.io.ByteArrayOutputStream;
+import java.io.ObjectOutputStream;
+import java.net.URLEncoder;
 
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.io.IntWritable;
+import org.apache.hadoop.io.Text;
+import org.apache.hadoop.mapreduce.Job;
+import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.mortbay.log.Log;
 
+import com.teamsun.porters.exe.MoveMain;
+import com.teamsun.porters.move.domain.BaseMoveDomain;
+import com.teamsun.porters.move.domain.HdfsDto;
 import com.teamsun.porters.move.domain.conf.ConfigDomain;
 import com.teamsun.porters.move.exception.BaseException;
+import com.teamsun.porters.move.mapper.DataMoveMapper;
 
 public abstract class MoveOpration
 {
@@ -86,5 +97,79 @@ public abstract class MoveOpration
 	    return sb.toString();
 	}
 	
+	public void runMapReduce(BaseMoveDomain srcDto, BaseMoveDomain destDto) throws BaseException
+	{
+		try 
+		{
+			HdfsDto hdsfDto = (HdfsDto) srcDto;
+			
+			Configuration config = new Configuration();
+			config.addResource("core-site.xml");
+			config.addResource("hdfs-site.xml");
+			config.addResource("yarn-site.xml");
+			config.addResource("mapred-site.xml");
+			config.addResource("hbase-site.xml");
+			config.set("srcDto", encode(srcDto));
+			config.set("destDto", encode(destDto));
+			config.set("type", type);
+			
+			Job job = new Job(config, type);
+			
+			
+			job.setJarByClass(MoveMain.class);
+			job.setMapperClass(DataMoveMapper.class);
+//	    	job.setCombinerClass(DataMovingReduce.class);
+//	   	 	job.setReducerClass(DataMovingReduce.class);
+			 
+			job.setNumReduceTasks(0);
+			job.setOutputKeyClass(Text.class);
+			job.setOutputValueClass(IntWritable.class);
+			 
+			FileInputFormat.addInputPath(job, new Path(hdsfDto.getHdfsLoc()));
+
+			System.exit(job.waitForCompletion(true) ? 0 : 1);
+		} 
+		catch (Exception e) 
+		{
+			e.printStackTrace();
+			throw new BaseException(e.getMessage());
+		}
+	}
+	
+	public String encode(BaseMoveDomain dto)
+	{
+		String str = "";
+		ByteArrayOutputStream baos = null;
+		ObjectOutputStream oos = null;
+		
+		try 
+		{
+			baos = new ByteArrayOutputStream();
+			oos = new ObjectOutputStream(baos);
+			oos.writeObject(dto);
+			oos.flush();
+			
+			str = baos.toString("ISO-8859-1");
+			str = URLEncoder.encode(str, "UTF-8");
+		} 
+		catch (Exception e) 
+		{
+			e.printStackTrace();
+		}
+		finally
+		{
+			try 
+			{
+				oos.close();
+				baos.close();
+			}
+			catch (Exception e) 
+			{
+				e.printStackTrace();
+			}
+		}
+		
+		return str;
+	}
 	
 }
