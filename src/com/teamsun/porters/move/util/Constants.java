@@ -65,4 +65,6 @@ public class Constants
 	public static final String HBASE_ROWKEY_SPLIT = "~";
 
 	public static final String CONFIG_HBASE_ROWKEY_PROTECTED = "hbase.rowkey.protected";
+	
+	public static final String OUT_PATH_TEMP = "/EMS_Data/teamsun/tmp";
 }

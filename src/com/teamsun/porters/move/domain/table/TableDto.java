@@ -1,9 +1,10 @@
 package com.teamsun.porters.move.domain.table;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-public class TableDto 
+public class TableDto implements Serializable
 {
 	private String tableName; 
     private String tableComment; 

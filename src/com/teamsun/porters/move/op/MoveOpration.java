@@ -1,6 +1,8 @@
 package com.teamsun.porters.move.op;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.net.URLEncoder;
 
@@ -17,7 +19,8 @@ import com.teamsun.porters.move.domain.BaseMoveDomain;
 import com.teamsun.porters.move.domain.HdfsDto;
 import com.teamsun.porters.move.domain.conf.ConfigDomain;
 import com.teamsun.porters.move.exception.BaseException;
-import com.teamsun.porters.move.mapper.DataMoveMapper;
+import com.teamsun.porters.move.mapper.Hdfs2TeradataMapper;
+import com.teamsun.porters.move.util.StringUtils;
 
 public abstract class MoveOpration
 {
@@ -97,36 +100,50 @@ public abstract class MoveOpration
 	    return sb.toString();
 	}
 	
-	public void runMapReduce(BaseMoveDomain srcDto, BaseMoveDomain destDto) throws BaseException
+	public Configuration getConfig(String path)
 	{
-		try 
+		Configuration config = new Configuration();
+		if (StringUtils.isEmpty(path))
 		{
-			HdfsDto hdsfDto = (HdfsDto) srcDto;
-			
-			Configuration config = new Configuration();
 			config.addResource("core-site.xml");
 			config.addResource("hdfs-site.xml");
 			config.addResource("yarn-site.xml");
 			config.addResource("mapred-site.xml");
 			config.addResource("hbase-site.xml");
-			config.set("srcDto", encode(srcDto));
-			config.set("destDto", encode(destDto));
-			config.set("type", type);
-			
-			Job job = new Job(config, type);
-			
-			
-			job.setJarByClass(MoveMain.class);
-			job.setMapperClass(DataMoveMapper.class);
-//	    	job.setCombinerClass(DataMovingReduce.class);
-//	   	 	job.setReducerClass(DataMovingReduce.class);
-			 
-			job.setNumReduceTasks(0);
-			job.setOutputKeyClass(Text.class);
-			job.setOutputValueClass(IntWritable.class);
-			 
-			FileInputFormat.addInputPath(job, new Path(hdsfDto.getHdfsLoc()));
-
+		}
+		else
+		{
+			config.addResource(path + File.separator + "core-site.xml");
+			config.addResource(path + File.separator + "hdfs-site.xml");
+			config.addResource(path + File.separator + "yarn-site.xml");
+			config.addResource(path + File.separator + "mapred-site.xml");
+			config.addResource(path + File.separator + "hbase-site.xml");
+		}
+		
+		return config;
+	}
+	
+	public Job getJob(Configuration config, String type) throws BaseException
+	{
+		Job job = null;
+		try 
+		{
+			 job = new Job(config, type);
+		}
+		catch (IOException e) 
+		{
+			e.printStackTrace();
+			throw new BaseException(e.getMessage());
+		}
+		
+		return job;
+	}
+	
+	
+	public void runMapReduce(Job job) throws BaseException
+	{
+		try 
+		{
 			System.exit(job.waitForCompletion(true) ? 0 : 1);
 		} 
 		catch (Exception e) 

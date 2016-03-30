@@ -1,25 +1,22 @@
 package com.teamsun.porters.move.op.hdfs;
 
-import java.io.IOException;
-
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.io.IntWritable;
-import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.teamsun.porters.exe.MoveMain;
 import com.teamsun.porters.move.domain.BaseMoveDomain;
 import com.teamsun.porters.move.domain.HdfsDto;
 import com.teamsun.porters.move.domain.conf.ConfigDomain;
 import com.teamsun.porters.move.exception.BaseException;
 import com.teamsun.porters.move.factory.MoveDtoFactory;
-import com.teamsun.porters.move.mapper.DataMoveMapper;
+import com.teamsun.porters.move.mapper.Hdfs2TeradataMapper;
 import com.teamsun.porters.move.op.MoveOpration;
+import com.teamsun.porters.move.util.Constants;
 import com.teamsun.porters.move.util.StringUtils;
 
 public class Hdfs2TeradataOp extends MoveOpration
@@ -68,9 +65,47 @@ public class Hdfs2TeradataOp extends MoveOpration
 		BaseMoveDomain srcDto = MoveDtoFactory.createSrcDto(configDto);
 		BaseMoveDomain destDto = MoveDtoFactory.createDestDto(configDto);
 		
-		log.info("begin to from hdfs to teradata");
-		runMapReduce(srcDto, destDto);
-		log.info("from hdfs to teradata finish");
+		HdfsDto hdfsDto = (HdfsDto) srcDto;
+		
+		try 
+		{
+			Configuration config = getConfig(null);
+			
+			config.set("srcDto", encode(srcDto));
+			config.set("destDto", encode(destDto));
+			config.set("type", type);
+			
+			Job job = getJob(config, type);
+			
+			job.setJarByClass(Hdfs2TeradataOp.class);
+			job.setMapperClass(Hdfs2TeradataMapper.class);
+//    		job.setCombinerClass(DataMovingReduce.class);
+//   	 	job.setReducerClass(DataMovingReduce.class);
+			 
+			job.setNumReduceTasks(0);
+//			job.setOutputKeyClass(Text.class);
+//			job.setOutputValueClass(IntWritable.class);
+			
+			// 判断output文件夹是否存在，如果存在则删除  
+			Path path = new Path(Constants.OUT_PATH_TEMP);  
+			FileSystem fileSystem = path.getFileSystem(config);// 根据path找到这个文件  
+			if (fileSystem.exists(path)) 
+			{  
+			    fileSystem.delete(path, true);// true的意思是，就算output有东西，也一带删除  
+			}  
+			 
+			FileInputFormat.addInputPath(job, new Path(hdfsDto.getHdfsLoc()));
+			FileOutputFormat.setOutputPath(job, new Path(Constants.OUT_PATH_TEMP));
+			
+			log.info("begin to from hdfs to teradata");
+			runMapReduce(job);
+			log.info("from hdfs to teradata finish");
+		} 
+		catch (Exception e) 
+		{
+			e.printStackTrace();
+			throw new BaseException(e.getMessage());
+		}
 	}
 
 	/*public void move() throws BaseException 

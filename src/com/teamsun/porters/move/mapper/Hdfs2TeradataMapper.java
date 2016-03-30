@@ -3,7 +3,6 @@ package com.teamsun.porters.move.mapper;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
-import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.util.StringTokenizer;
 
@@ -15,11 +14,11 @@ import org.slf4j.LoggerFactory;
 
 import com.teamsun.porters.move.domain.BaseMoveDomain;
 
-public class DataMoveMapper extends Mapper<Object, Text, Text, IntWritable> 
+public class Hdfs2TeradataMapper extends Mapper<Object, Text, Text, IntWritable> 
 {
-	private static Logger log = LoggerFactory.getLogger(DataMoveMapper.class);
+	private static Logger log = LoggerFactory.getLogger(Hdfs2TeradataMapper.class);
 	
-	public DataMoveMapper() 
+	public Hdfs2TeradataMapper() 
 	{
 		super();
 	}
@@ -27,12 +26,16 @@ public class DataMoveMapper extends Mapper<Object, Text, Text, IntWritable>
 	@Override
 	protected void map(Object key, Text value, Mapper<Object, Text, Text, IntWritable>.Context context)	throws IOException, InterruptedException 
 	{
-		String destDtoStr = context.getConfiguration().get("jobDestDto");
+		String srcDtoStr = context.getConfiguration().get("srcDto");
+		String destDtoStr = context.getConfiguration().get("destDto");
+		BaseMoveDomain srcDto = decode(srcDtoStr);
 		BaseMoveDomain destDto = decode(destDtoStr);
 		
 		StringTokenizer itr = new StringTokenizer(value.toString());
+		log.info(value.toString());
 		while (itr.hasMoreTokens()) 
 		{
+			log.info(itr.nextToken());
 //			this.word.set(itr.nextToken());
 //			context.write(this.word, one);
 		}

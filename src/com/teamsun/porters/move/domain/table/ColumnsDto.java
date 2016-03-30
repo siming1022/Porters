@@ -1,6 +1,8 @@
 package com.teamsun.porters.move.domain.table;
 
-public class ColumnsDto 
+import java.io.Serializable;
+
+public class ColumnsDto implements Serializable
 {
 	private String columnName; 
     private String columnComment; 
