@@ -1,5 +1,15 @@
 package com.teamsun.porters.move.op.hdfs;
 
+import java.io.BufferedReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.sql.Connection;
+import java.sql.Statement;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.LinkedBlockingQueue;
+
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -11,12 +21,16 @@ import org.slf4j.LoggerFactory;
 
 import com.teamsun.porters.move.domain.BaseMoveDomain;
 import com.teamsun.porters.move.domain.HdfsDto;
+import com.teamsun.porters.move.domain.TeradataDto;
 import com.teamsun.porters.move.domain.conf.ConfigDomain;
+import com.teamsun.porters.move.domain.table.ColumnsDto;
 import com.teamsun.porters.move.exception.BaseException;
 import com.teamsun.porters.move.factory.MoveDtoFactory;
 import com.teamsun.porters.move.mapper.Hdfs2TeradataMapper;
 import com.teamsun.porters.move.op.MoveOpration;
+import com.teamsun.porters.move.thread.Hdfs2TeradataThread;
 import com.teamsun.porters.move.util.Constants;
+import com.teamsun.porters.move.util.DBMSMetaUtil;
 import com.teamsun.porters.move.util.StringUtils;
 
 public class Hdfs2TeradataOp extends MoveOpration
@@ -66,14 +80,20 @@ public class Hdfs2TeradataOp extends MoveOpration
 		BaseMoveDomain destDto = MoveDtoFactory.createDestDto(configDto);
 		
 		HdfsDto hdfsDto = (HdfsDto) srcDto;
+		TeradataDto teradataDto = (TeradataDto) destDto;
 		
 		try 
 		{
 			Configuration config = getConfig(null);
+			Connection conn = DBMSMetaUtil.getConnection(teradataDto.getDriverClass(), teradataDto.getJdbcUrl(), teradataDto.getUserName(), teradataDto.getPasswd());
+			Statement stm = conn.createStatement();
 			
 			config.set("srcDto", encode(srcDto));
 			config.set("destDto", encode(destDto));
 			config.set("type", type);
+			config.set("insertColsSql", getInsertSql(teradataDto));
+			config.set("stm", encode(stm));
+			
 			
 			Job job = getJob(config, type);
 			
@@ -105,6 +125,59 @@ public class Hdfs2TeradataOp extends MoveOpration
 		{
 			e.printStackTrace();
 			throw new BaseException(e.getMessage());
+		}
+	}
+	
+	private String getInsertSql(TeradataDto teradataDto) 
+	{
+		StringBuffer sql = new StringBuffer("INSERT INTO " + teradataDto.getDatabaseName() + "." + teradataDto.getTableName() + " (");
+		for (ColumnsDto colDto : teradataDto.getTableDto().getColumnList())
+		{
+			sql.append(colDto.getColumnName() + ", ");
+		}
+		
+		sql = new StringBuffer(sql.substring(0, sql.length() - 2) + ") VALUES (");
+		
+		return sql.toString();
+	}
+	
+	public void move2() throws BaseException
+	{
+		BaseMoveDomain srcDto = MoveDtoFactory.createSrcDto(configDto);
+		BaseMoveDomain destDto = MoveDtoFactory.createDestDto(configDto);
+		
+		HdfsDto hdfsDto = (HdfsDto) srcDto;
+		TeradataDto teradataDto = (TeradataDto) destDto;
+		
+		try 
+		{
+			
+			BlockingQueue<String> queue = new LinkedBlockingQueue<String>(50000);
+			
+			Configuration config = getConfig(null);
+			FileSystem fs = FileSystem.get(config);
+			Path path = new Path(hdfsDto.getHdfsLoc());
+			InputStream is = fs.open(path);
+			InputStreamReader isr = new InputStreamReader(is, "GBK");
+			BufferedReader br = new BufferedReader(isr, 5*1024*1024);
+			String line = "";
+			 while((line = br.readLine()) != null) 
+			 {
+				 queue.put(line);
+			 }
+
+			 ExecutorService sendDataPool = Executors.newFixedThreadPool(8);
+			 
+			 for (int i = 0; i < 8; i++) 
+			 {
+				 sendDataPool.submit(new Hdfs2TeradataThread(queue, teradataDto));
+			 }
+			 
+			 sendDataPool.shutdown();
+		} 
+		catch (Exception e) 
+		{
+			e.printStackTrace();
 		}
 	}
 

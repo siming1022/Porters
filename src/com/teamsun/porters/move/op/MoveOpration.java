@@ -153,7 +153,7 @@ public abstract class MoveOpration
 		}
 	}
 	
-	public String encode(BaseMoveDomain dto)
+	public String encode(Object dto)
 	{
 		String str = "";
 		ByteArrayOutputStream baos = null;

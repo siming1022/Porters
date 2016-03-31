@@ -63,8 +63,22 @@ public class Constants
 	public static final String HIVE_EXT_DATABASE_NAME_PDATA = "EMS_PDATA";
 	
 	public static final String HBASE_ROWKEY_SPLIT = "~";
+	
+	public static final String DATA_SPLIT = "\t";
 
 	public static final String CONFIG_HBASE_ROWKEY_PROTECTED = "hbase.rowkey.protected";
 	
 	public static final String OUT_PATH_TEMP = "/EMS_Data/teamsun/tmp";
+	
+	public static final String DATA_TYPE_VARCHAR = "VARCHAR";
+	
+	public static final String DATA_TYPE_CHAR = "CHAR";
+	
+	public static final String DATA_TYPE_LONG = "LONG";
+
+	public static final String DATA_TYPE_NUMBER = "NUMBER";
+	
+	public static final String DATA_TYPE_DATE = "DATE";
+	
+	public static final String DATA_TYPE_TIMESTAMP = "TIMESTAMP";
 }

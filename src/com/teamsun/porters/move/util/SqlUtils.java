@@ -107,4 +107,31 @@ public class SqlUtils
 	{
 		return MessageFormat.format(SqlTemplate.HIVE_DROP_TABLE_SQL, Constants.HIVE_EXT_DATABASE_NAME_TEST, destDto.getTableName());
 	}
+	
+	public static String getValue(String colType, String value, String dbType) 
+	{
+		if (colType.startsWith(Constants.DATA_TYPE_VARCHAR) || colType.startsWith(Constants.DATA_TYPE_CHAR))
+		{
+			return "'" + value + "'";
+		}
+		else if (colType.startsWith(Constants.DATA_TYPE_LONG) || colType.startsWith(Constants.DATA_TYPE_NUMBER))
+		{
+			return value;
+		}
+		else if (colType.startsWith(Constants.DATA_TYPE_DATE))
+		{
+			if (value.length() == 10)
+				return "TO_DATE('" + value + "', 'YYYY-MM-DD')";
+			else
+				return "TO_DATE('" + value + "', 'YYYY-MM-DD HH24:MI:SS')";
+		}
+		else if (colType.startsWith(Constants.DATA_TYPE_TIMESTAMP))
+		{
+			return "TO_DATE('" + value + "', 'YYYY-MM-DD HH24:MI:SS')";
+		}
+		else
+		{
+			return "'" + value + "'"; 
+		}
+	}
 }
