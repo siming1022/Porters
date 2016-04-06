@@ -1,6 +1,8 @@
 package com.teamsun.porters.move.op.hdfs;
 
 import java.io.BufferedReader;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.sql.Connection;
@@ -11,6 +13,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
 
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.mapreduce.Job;
@@ -73,8 +76,7 @@ public class Hdfs2TeradataOp extends MoveOpration
 		}
 	}
 
-	@Override
-	public void move() throws BaseException 
+	public void move2() throws BaseException 
 	{
 		BaseMoveDomain srcDto = MoveDtoFactory.createSrcDto(configDto);
 		BaseMoveDomain destDto = MoveDtoFactory.createDestDto(configDto);
@@ -137,7 +139,8 @@ public class Hdfs2TeradataOp extends MoveOpration
 		return sql.toString();
 	}
 	
-	public void move2() throws BaseException
+	@Override
+	public void move() throws BaseException
 	{
 		BaseMoveDomain srcDto = MoveDtoFactory.createSrcDto(configDto);
 		BaseMoveDomain destDto = MoveDtoFactory.createDestDto(configDto);
@@ -153,23 +156,68 @@ public class Hdfs2TeradataOp extends MoveOpration
 			Configuration config = getConfig(null);
 			FileSystem fs = FileSystem.get(config);
 			Path path = new Path(hdfsDto.getHdfsLoc());
-			InputStream is = fs.open(path);
-			InputStreamReader isr = new InputStreamReader(is, "GBK");
-			BufferedReader br = new BufferedReader(isr, 5*1024*1024);
-			String line = "";
-			 while((line = br.readLine()) != null) 
-			 {
-				 queue.put(line);
-			 }
+			
+			ExecutorService sendDataPool = Executors.newFixedThreadPool(8);
+			
+			for (int i = 0; i < 8; i++) 
+			{
+				sendDataPool.submit(new Hdfs2TeradataThread(queue, teradataDto));
+			}
+			
+			sendDataPool.shutdown();
 
-			 ExecutorService sendDataPool = Executors.newFixedThreadPool(8);
-			 
-			 for (int i = 0; i < 8; i++) 
-			 {
-				 sendDataPool.submit(new Hdfs2TeradataThread(queue, teradataDto));
-			 }
-			 
-			 sendDataPool.shutdown();
+			readHdfsFile(fs, path, queue);
+			
+		} 
+		catch (Exception e) 
+		{
+			e.printStackTrace();
+		}
+	}
+	
+	private void readHdfsFile(FileSystem fs, Path path, BlockingQueue<String> queue)
+	{
+		try 
+		{
+			FileStatus[] fileStatus = fs.listStatus(path);
+			
+			for (FileStatus fileState : fileStatus)
+			{
+				if (fileState.isDir())
+				{
+					readHdfsFile(fs, fileState.getPath(), queue);
+				}
+				else
+				{
+					InputStream is = null;
+					InputStreamReader isr = null;
+					BufferedReader br = null;
+					try 
+					{
+						is = fs.open(fileState.getPath());
+						isr = new InputStreamReader(is, "GBK");
+						br = new BufferedReader(isr, 5*1024*1024);
+						String line = "";
+						while((line = br.readLine()) != null) 
+						{
+							queue.put(line);
+						}
+					} 
+					catch (Exception e) 
+					{
+						e.printStackTrace();
+					}
+					finally
+					{
+						if (br != null)
+							br.close();
+						if (isr != null)
+							isr.close();
+						if (is != null)
+							is.close();
+					}
+				}
+			}
 		} 
 		catch (Exception e) 
 		{

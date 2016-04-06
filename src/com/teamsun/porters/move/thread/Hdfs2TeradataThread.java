@@ -14,6 +14,7 @@ import com.teamsun.porters.move.op.hdfs.Hdfs2TeradataOp;
 import com.teamsun.porters.move.util.Constants;
 import com.teamsun.porters.move.util.DBMSMetaUtil;
 import com.teamsun.porters.move.util.SqlUtils;
+import com.teamsun.porters.move.util.StringUtils;
 
 public class Hdfs2TeradataThread extends Thread 
 {
@@ -28,6 +29,7 @@ public class Hdfs2TeradataThread extends Thread
 
 	public Hdfs2TeradataThread(BlockingQueue<String> queue, BaseMoveDomain baseMoveDomain)
 	{
+		log.info("Hdfs2TeradataThread init");
 		this.queue = queue;
 		this.baseMoveDomain = baseMoveDomain;
 	}
@@ -53,7 +55,7 @@ public class Hdfs2TeradataThread extends Thread
 			
 			while (true)
 			{
-				if (sleepCount >= 3)
+				if (sleepCount >= 5)
 				{
 					stm.executeBatch();
 					conn.commit();
@@ -88,15 +90,15 @@ public class Hdfs2TeradataThread extends Thread
 					
 					insertValsSql = insertValsSql.substring(0, insertValsSql.length() -2) + ")";
 					
-					insertSql = insertColsSql += insertValsSql;
+					insertSql = insertColsSql + insertValsSql;
 					
-					stm.addBatch(insertSql);
-					count++;
+					stm.executeUpdate(insertSql);
+					count ++;
 					
-					if (count > 0 && count%500==0)
+					if (count > 0 && count%200==0)
 					{
-						stm.executeBatch();
 						conn.commit();
+						count = 0;
 					}
 				} 
 				catch (Exception e) 
