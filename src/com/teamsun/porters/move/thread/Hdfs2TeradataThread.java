@@ -67,32 +67,42 @@ public class Hdfs2TeradataThread extends Thread
 					continue;
 				}
 				
-				String[] values = queue.take().split(Constants.DATA_SPLIT);
+				String insertSql = "";
 				
-				if (values.length < colSize)
+				try 
 				{
-					continue;
-				}
-				
-				String insertValsSql = "";
-				
-				for (int i = 0; i < colSize; i++)
+					String[] values = queue.take().split(Constants.DATA_SPLIT);
+					
+					if (values.length < colSize)
+					{
+						continue;
+					}
+					
+					String insertValsSql = "";
+					
+					for (int i = 0; i < colSize; i++)
+					{
+						ColumnsDto colDto = teradataDto.getTableDto().getColumnList().get(i);
+						insertValsSql += SqlUtils.getValue(colDto.getSqlType(), values[i], Constants.DATA_TYPE_TERADATA) + ", ";
+					}
+					
+					insertValsSql = insertValsSql.substring(0, insertValsSql.length() -2) + ")";
+					
+					insertSql = insertColsSql += insertValsSql;
+					
+					stm.addBatch(insertSql);
+					count++;
+					
+					if (count > 0 && count%500==0)
+					{
+						stm.executeBatch();
+						conn.commit();
+					}
+				} 
+				catch (Exception e) 
 				{
-					ColumnsDto colDto = teradataDto.getTableDto().getColumnList().get(i);
-					insertValsSql += SqlUtils.getValue(colDto.getSqlType(), values[i], Constants.DATA_TYPE_TERADATA) + ", ";
-				}
-				
-				insertValsSql = insertValsSql.substring(0, insertValsSql.length() -2) + ")";
-				
-				String insertSql = insertColsSql += insertValsSql;
-				
-				stm.addBatch(insertSql);
-				count++;
-				
-				if (count > 0 && count%500==0)
-				{
-					stm.executeBatch();
-					conn.commit();
+					log.error("batch insert error, sql: " + insertSql);
+					e.printStackTrace();
 				}
 			}
 			

@@ -85,14 +85,10 @@ public class Hdfs2TeradataOp extends MoveOpration
 		try 
 		{
 			Configuration config = getConfig(null);
-			Connection conn = DBMSMetaUtil.getConnection(teradataDto.getDriverClass(), teradataDto.getJdbcUrl(), teradataDto.getUserName(), teradataDto.getPasswd());
-			Statement stm = conn.createStatement();
-			
 			config.set("srcDto", encode(srcDto));
 			config.set("destDto", encode(destDto));
 			config.set("type", type);
 			config.set("insertColsSql", getInsertSql(teradataDto));
-			config.set("stm", encode(stm));
 			
 			
 			Job job = getJob(config, type);

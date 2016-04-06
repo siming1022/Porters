@@ -5,22 +5,20 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.net.URLDecoder;
 import java.sql.Connection;
-import java.sql.SQLException;
 import java.sql.Statement;
 
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.Text;
-import org.apache.hadoop.mapred.Counters.Counter;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.teamsun.porters.move.domain.BaseMoveDomain;
 import com.teamsun.porters.move.domain.HdfsDto;
 import com.teamsun.porters.move.domain.TeradataDto;
 import com.teamsun.porters.move.domain.table.ColumnsDto;
 import com.teamsun.porters.move.exception.BaseException;
 import com.teamsun.porters.move.util.Constants;
+import com.teamsun.porters.move.util.DBMSMetaUtil;
 import com.teamsun.porters.move.util.SqlUtils;
 
 public class Hdfs2TeradataMapper extends Mapper<Object, Text, Text, IntWritable> 
@@ -36,13 +34,17 @@ public class Hdfs2TeradataMapper extends Mapper<Object, Text, Text, IntWritable>
 	@Override
 	protected void map(Object key, Text value, Mapper<Object, Text, Text, IntWritable>.Context context)	throws IOException, InterruptedException 
 	{
+		Connection conn = null;
+		Statement stm = null;
 		try
 		{
 //			context.getCounter(org.apache.hadoop.mapred.Task.Counter.MAP_INPUT_RECORDS).;
 			HdfsDto hdfsDto = (HdfsDto) decode(context.getConfiguration().get("srcDto"));
 			TeradataDto teradataDto = (TeradataDto) decode(context.getConfiguration().get("destDto"));
 			String insertColsSql = context.getConfiguration().get("insertColsSql");
-			Statement stm = (Statement) decode(context.getConfiguration().get("stm"));
+			
+			conn = DBMSMetaUtil.getConnection(teradataDto.getDriverClass(), teradataDto.getJdbcUrl(), teradataDto.getUserName(), teradataDto.getPasswd());
+			stm = conn.createStatement();
 			
 			int colSize = teradataDto.getTableDto().getColumnList().size();
 			

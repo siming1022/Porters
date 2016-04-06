@@ -72,8 +72,12 @@
         <name>dfs.support.append</name>
         <value>true</value>
     </property>
-    <property>
+    <!-- <property>
         <name>hbase.regionserver.lease.period</name>
+        <value>60000000</value>
+    </property> -->
+    <property>
+        <name>hbase.client.scanner.timeout.period</name>
         <value>60000000</value>
     </property>
     <property>
