@@ -2,27 +2,28 @@ package com.teamsun.porters.move.util;
 
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
-import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 
+import com.teamsun.porters.move.connpool.ConnectionPoolManager;
+import com.teamsun.porters.move.connpool.bean.DBbean;
 import com.teamsun.porters.move.domain.table.ColumnsDto;
 import com.teamsun.porters.move.domain.table.TableDto;
+import com.teamsun.porters.move.template.SqlTemplate;
 
 /**
  * 需要注意,想要有表字段描述信息，获取连接时需要指定某些特殊属性<br/> 
  * 数据交换-工具类
  */
-public class DBMSMetaUtil {
-
-
+public class DBMSMetaUtil 
+{
 	/**
 	 * 数据库类型,枚举
 	 * 
@@ -115,19 +116,18 @@ public class DBMSMetaUtil {
 		return DATABASETYPE.OTHER;
 	}
 	
-	public static TableDto getTableDto(DATABASETYPE dbtype, String driverClass, String ip, String port, String dbname, String username, String password, String tableName)
+	public static TableDto getTableDto(DATABASETYPE dbtype, String driverClass, String ip, long port, String dbname, String username, String password, String tableName, long days, String tns)
 	{
 		TableDto tableDto = new TableDto();
 		
 		// 去除首尾空格
 		ip = trim(ip);
-		port = trim(port);
 		dbname = trim(dbname);
 		username = trim(username);
 		password = trim(password);
 		tableName = trim(tableName);
 		//
-		String url = concatDBURL(dbtype, ip, port, dbname);
+		String url = !StringUtils.isEmpty(tns)?tns:concatDBURL(dbtype, ip, port, dbname);
 		Connection conn = null;
 		ResultSet rs = null;
 		//
@@ -189,8 +189,8 @@ public class DBMSMetaUtil {
 				throw new RuntimeException("不认识的数据库类型!");
 			}
 			//
-			tableDto = parseResulDto(rs);
-
+			tableDto.setTableName(tableName);
+			tableDto = getPartitions(dbtype, parseResulDto(rs, tableDto), conn, days);
 		} catch (Exception e) {
 			e.printStackTrace();
 		} finally {
@@ -198,19 +198,89 @@ public class DBMSMetaUtil {
 			close(conn);
 		}
 		//
+		
+		if (tableDto == null)
+			System.out.println("A");
 		return tableDto;
 	}
 		
 
+	private static TableDto getPartitions(DATABASETYPE dbtype, TableDto tableDto, Connection conn, long days) 
+	{
+		if (DATABASETYPE.ORACLE.equals(dbtype))
+		{
+			String queryPartitionsSql = MessageFormat.format(SqlTemplate.ORACLE_QUERY_TABLE_PARTITION_COL_SQL, tableDto.getTableName());
+			ResultSet rs = null;
+			String sql = null;
+			try 
+			{
+				Statement stm = conn.createStatement();
+				
+//				System.out.println(queryPartitionsSql);
+				rs = stm.executeQuery(queryPartitionsSql);
+				while (rs.next())
+				{
+					String colName = rs.getString("COLUMN_NAME");
+					tableDto.setPartitionCol(colName);
+					
+					Statement stm2 = conn.createStatement();
+					
+					
+					//
+					
+					if (!"-1".equals(days))
+					{
+						String partitionWhere = colName + " >= SYSDATE - " + days;
+						
+						for (ColumnsDto cd : tableDto.getColumnList())
+						{
+							if (cd.getColumnName().toUpperCase().equals(colName.toUpperCase()))
+							{
+								//如果分区字段类型不是DATE，就需要将WHERE里的条件改变（哪个B建的表，分区字段干毛要弄别的类型，有猫饼）
+								if (!"DATE".equals(cd.getSqlType().toUpperCase()))
+								{
+									partitionWhere = colName + " >= TO_CHAR(SYSDATE - " + days + ", 'YYYYMMDD')";
+								}
+							}
+						}
+						sql = MessageFormat.format(SqlTemplate.ORACLE_QUERY_TABLE_PARTITION_SQL, colName, tableDto.getTableName(), partitionWhere, colName, colName);
+						
+					}
+					else
+					{
+						sql = MessageFormat.format(SqlTemplate.ORACLE_QUERY_TABLE_PARTITION_NO_TIME_SQL, colName, tableDto.getTableName(), colName, colName);
+					}
+					
+					
+					ResultSet rs2 = stm2.executeQuery(sql);
+					List<String> values = new ArrayList<String>();
+					while (rs2.next())
+					{
+						values.add(rs2.getString("value"));
+					}
+					
+					tableDto.setPartitionList(values);
+				}
+			}
+			catch (SQLException e) 
+			{
+				e.printStackTrace();
+				System.out.println(sql);
+			}
+		}
+		
+		
+		return tableDto;
+	}
+
 	/**
 	 * 列出数据库的所有表
 	 */
-	public static List<Map<String, Object>> listTables(String databasetype, String driverClass, String ip, String port, String dbname,
+	public static List<Map<String, Object>> listTables(String databasetype, String driverClass, String ip, long port, String dbname,
 			String username, String password) {
 		// 去除首尾空格
 		databasetype = trim(databasetype);
 		ip = trim(ip);
-		port = trim(port);
 		dbname = trim(dbname);
 		username = trim(username);
 		password = trim(password);
@@ -289,12 +359,11 @@ public class DBMSMetaUtil {
 	/**
 	 * 列出表的所有字段
 	 */
-	public static List<Map<String, Object>> listColumns(String databasetype, String driverClass, String ip, String port, String dbname,
+	public static List<Map<String, Object>> listColumns(String databasetype, String driverClass, String ip, long port, String dbname,
 			String username, String password, String tableName) {
 		// 去除首尾空格
 		databasetype = trim(databasetype);
 		ip = trim(ip);
-		port = trim(port);
 		dbname = trim(dbname);
 		username = trim(username);
 		password = trim(password);
@@ -358,7 +427,7 @@ public class DBMSMetaUtil {
 	 * @param dbname
 	 * @return
 	 */
-	public static String concatDBURL(DATABASETYPE dbtype, String ip, String port, String dbname) {
+	public static String concatDBURL(DATABASETYPE dbtype, String ip, long port, String dbname) {
 		//
 		String url = "";
 		// Oracle数据库
@@ -366,13 +435,13 @@ public class DBMSMetaUtil {
 			//
 			url += "jdbc:oracle:thin:@";
 			url += ip.trim();
-			url += ":" + port.trim();
+			url += ":" + port;
 			url += ":" + dbname;
 			
 			// 如果需要采用 hotbackup
 			String url2 = "";
 			url2 = url2+"jdbc:oracle:thin:@(DESCRIPTION = (ADDRESS_LIST = (ADDRESS = (PROTOCOL = TCP)(HOST = "
-					+ ip.trim() +")(PORT ="+ port.trim() +")))(CONNECT_DATA = (SERVICE_NAME ="+dbname+
+					+ ip.trim() +")(PORT ="+ port +")))(CONNECT_DATA = (SERVICE_NAME ="+dbname+
 					")(FAILOVER_MODE = (TYPE = SELECT)(METHOD = BASIC)(RETRIES = 180)(DELAY = 5))))";
 			//
 			// url = url2;
@@ -380,37 +449,37 @@ public class DBMSMetaUtil {
 			//
 			url += "jdbc:mysql://";
 			url += ip.trim();
-			url += ":" + port.trim();
+			url += ":" + port;
 			url += "/" + dbname;
 		} else if (DATABASETYPE.SQLSERVER.equals(dbtype)) {
 			//
 			url += "jdbc:jtds:sqlserver://";
 			url += ip.trim();
-			url += ":" + port.trim();
+			url += ":" + port;
 			url += "/" + dbname;
 			url += ";tds=8.0;lastupdatecount=true";
 		} else if (DATABASETYPE.SQLSERVER2005.equals(dbtype)) {
 			//
 			url += "jdbc:sqlserver://";
 			url += ip.trim();
-			url += ":" + port.trim();
+			url += ":" + port;
 			url += "; DatabaseName=" + dbname;
 		} else if (DATABASETYPE.DB2.equals(dbtype)) {
 			url += "jdbc:db2://";
 			url += ip.trim();
-			url += ":" + port.trim();
+			url += ":" + port;
 			url += "/" + dbname;
 		} else if (DATABASETYPE.INFORMIX.equals(dbtype)) {
 			// Infox mix 可能有BUG
 			url += "jdbc:informix-sqli://";
 			url += ip.trim();
-			url += ":" + port.trim();
+			url += ":" + port;
 			url += "/" + dbname;
 			// +":INFORMIXSERVER=myserver;user="+bean.getDatabaseuser()+";password="+bean.getDatabasepassword()
 		} else if (DATABASETYPE.SYBASE.equals(dbtype)) {
 			url += "jdbc:sybase:Tds:";
 			url += ip.trim();
-			url += ":" + port.trim();
+			url += ":" + port;
 			url += "/" + dbname;
 		} else if (DATABASETYPE.TERADATA.equals(dbtype)) {
 			url += "jdbc:teradata://";
@@ -426,7 +495,7 @@ public class DBMSMetaUtil {
 		} else if (DATABASETYPE.HIVE.equals(dbtype) || DATABASETYPE.HBASE.equals(dbtype)) {
 			url += "jdbc:hive2://";
 			url += ip.trim();
-			url += ":" + port.trim();
+			url += ":" + port;
 			url += "/" + (StringUtils.isEmpty(dbname)?"default":dbname);
 		} else {
 			throw new RuntimeException("不认识的数据库类型!");
@@ -445,7 +514,27 @@ public class DBMSMetaUtil {
 	 */
 	public static Connection getConnection(String driverClass, String url, String username, String password) {
 		Connection conn = null;
-		try {
+		String poolName = "pool-" + url;
+		
+		if (ConnectionPoolManager.getInstance().getPool(poolName) == null)
+		{
+			DBbean beanOracle = new DBbean();  
+			beanOracle.setDriverName(driverClass);  
+			beanOracle.setUrl(url);  
+			beanOracle.setUserName(username);  
+			beanOracle.setPassword(password);  
+			  
+			beanOracle.setMinConnections(15);  
+			beanOracle.setMaxConnections(100);  
+			  
+			beanOracle.setPoolName(poolName);  
+			
+			ConnectionPoolManager.getInstance().init(beanOracle);
+		}
+		
+		conn = ConnectionPoolManager.getInstance().getConnection(poolName);
+		
+		/*try {
 			Class.forName(driverClass);
 			//
 			Properties info =new Properties();
@@ -458,10 +547,20 @@ public class DBMSMetaUtil {
 			info.put("useInformationSchema","true");
 			// 不知道SQLServer需不需要设置...
 			//
-			conn = DriverManager.getConnection(url, info);
+			
+			String key = url + "~" + username + "~" + password;
+			if (connPool.containsKey(key))
+			{
+				conn = DriverManager.getConnection(url, info);
+			}
+			else
+			{
+//				DriverManager.getConnection(url, info);
+			}
 		} catch (Exception e) {
 			e.printStackTrace();
-		}
+			System.out.println(url + ", " + username + ", " + password);
+		}*/
 		return conn;
 	}
 
@@ -528,14 +627,12 @@ public class DBMSMetaUtil {
 		return map;
 	}
 	
-	private static TableDto parseResulDto(ResultSet rs) 
+	private static TableDto parseResulDto(ResultSet rs, TableDto tableDto) 
 	{
 		if (null == rs) 
 		{
 			return null;
 		}
-		
-		TableDto tableDto = new TableDto();
 		
 		try 
 		{
@@ -563,7 +660,7 @@ public class DBMSMetaUtil {
 	}
 	
 	//
-	public static boolean TryLink(String databasetype, String driverClass, String ip, String port, String dbname, String username, String password) {
+	public static boolean TryLink(String databasetype, String driverClass, String ip, long port, String dbname, String username, String password) {
 		//
 		DATABASETYPE dbtype = parseDATABASETYPE(databasetype);
 		String url = concatDBURL(dbtype, ip, port, dbname);

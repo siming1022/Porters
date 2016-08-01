@@ -58,7 +58,7 @@ public abstract class MoveOpration
 	public String runCommand(String command) throws BaseException
 	{
 		StringBuffer sb = new StringBuffer();
-		Log.info(command);
+//		Log.info(command);
 		/*BufferedReader reader = null;
 		InputStreamReader isr = null;
 		try 

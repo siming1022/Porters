@@ -42,8 +42,8 @@ public class MoveMain
 	public static Properties configPro = Utils.getPropertiesFromFile("config.properties");
 	
 //	private static final String EXCEL_LOCATION = "~/app/file/";
-	private static final String EXCEL_LOCATION = "C://zsm//porters";
-	private static final int EXEC_COUNT = 10;
+	private static final String EXCEL_LOCATION = "D://porters";
+	private static final int EXEC_COUNT = 500;
 	
 	public static void main(String[] args) 
 	{
@@ -82,7 +82,7 @@ public class MoveMain
 					
 					if (oprations != null && oprations.size() > 0)
 					{
-						int threadCount = oprations.size()%EXEC_COUNT==0?oprations.size()/EXEC_COUNT:(oprations.size()/50)+1;
+						int threadCount = oprations.size()%EXEC_COUNT==0?oprations.size()/EXEC_COUNT:(oprations.size()/EXEC_COUNT)+1;
 						ExecutorService threadPool = Executors.newFixedThreadPool(threadCount);
 						
 						for (int i = 0; i < threadCount; i++)
@@ -196,6 +196,9 @@ public class MoveMain
 
 	public static void transMap2Bean(Map<String, Object> map, Object obj) throws BaseException
 	{
+		String key = null;
+		Object value = null;
+		
 		try 
 		{
 			BeanInfo beanInfo = Introspector.getBeanInfo(obj.getClass());
@@ -203,13 +206,18 @@ public class MoveMain
 
 			for (PropertyDescriptor property : propertyDescriptors) 
 			{
-				String key = property.getName();
+				key = property.getName();
+//				System.out.println(key);
 				if (map.containsKey(key)) 
 				{
-					Object value = map.get(key);
+					value = map.get(key);
+//					System.out.println(value.getClass());
 					// 得到property对应的setter方法
-					Method setter = property.getWriteMethod();
-					setter.invoke(obj, value);
+					if (!StringUtils.isObjEmpty(value))
+					{
+						Method setter = property.getWriteMethod();
+						setter.invoke(obj, value);
+					}
 				}
 			}
 
@@ -217,6 +225,7 @@ public class MoveMain
 		catch (Exception e) 
 		{
 			e.printStackTrace();
+			System.out.println(key + ": " + value + ": " + value.getClass());
 			throw new BaseException(e.getMessage());
 		}
 

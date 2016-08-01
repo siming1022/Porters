@@ -7,12 +7,12 @@ public abstract class BaseMoveDomain implements Serializable
 	protected String ip;
 	protected String userName;
 	protected String passwd;
-	protected String port;
+	protected long port;
 	
-	public String getPort() {
+	public long getPort() {
 		return port;
 	}
-	public void setPort(String port) {
+	public void setPort(long port) {
 		this.port = port;
 	}
 	public String getIp() {

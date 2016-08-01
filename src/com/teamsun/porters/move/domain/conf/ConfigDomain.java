@@ -14,8 +14,8 @@ public class ConfigDomain extends BaseMoveDomain
 	private String destHdfsLoc;
 	private String sourceDBIp;
 	private String destDBIp;
-	private String sourceDBPort;
-	private String destDBPort;
+	private long sourceDBPort;
+	private long destDBPort;
 	private String sourceDBName;
 	private String destDBName;
 	private String sourceDBUserName;
@@ -27,7 +27,14 @@ public class ConfigDomain extends BaseMoveDomain
 	private String sourceDBTns;
 	private String destDBTns;
 	private String destTableColFamily;
+	private long days;	//导多少天的数据
 	
+	public long getDays() {
+		return days;
+	}
+	public void setDays(long days) {
+		this.days = days;
+	}
 	public String getDestTableColFamily() {
 		return destTableColFamily;
 	}
@@ -112,16 +119,16 @@ public class ConfigDomain extends BaseMoveDomain
 	public void setDestDBIp(String destDBIp) {
 		this.destDBIp = destDBIp;
 	}
-	public String getSourceDBPort() {
+	public long getSourceDBPort() {
 		return sourceDBPort;
 	}
-	public void setSourceDBPort(String sourceDBPort) {
+	public void setSourceDBPort(long sourceDBPort) {
 		this.sourceDBPort = sourceDBPort;
 	}
-	public String getDestDBPort() {
+	public long getDestDBPort() {
 		return destDBPort;
 	}
-	public void setDestDBPort(String destDBPort) {
+	public void setDestDBPort(long destDBPort) {
 		this.destDBPort = destDBPort;
 	}
 	public String getSourceDBName() {

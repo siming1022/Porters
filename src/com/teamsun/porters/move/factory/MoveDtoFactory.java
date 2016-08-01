@@ -36,7 +36,7 @@ public class MoveDtoFactory
 			dto.setPasswd(configDto.getSourceDBPwd());
 			dto.setTableName(configDto.getSourceTable());
 			dto.setQuerySql(configDto.getQuerySql());
-			dto.setTns(configDto.getSourceDBTns().replaceAll(" ", "").replaceAll("\n", ""));
+			dto.setTns(configDto.getSourceDBTns()!=null?configDto.getSourceDBTns().replaceAll(" ", "").replaceAll("\n", ""):"");
 			dto.setColumns(configDto.getColumns());
 			
 			DATABASETYPE databaseType = DBMSMetaUtil.parseDATABASETYPE(dataSource);
@@ -44,7 +44,7 @@ public class MoveDtoFactory
 			String jdbcUrl = StringUtils.isEmpty(dto.getTns())?DBMSMetaUtil.concatDBURL(databaseType, configDto.getSourceDBIp(), configDto.getSourceDBPort(), configDto.getSourceDBName()):dto.getTns();
 			dto.setJdbcUrl(jdbcUrl);
 			dto.setTableDto(DBMSMetaUtil.getTableDto(databaseType, Constants.DB_DRIVER_CLASS_ORACLE, configDto.getSourceDBIp(), configDto.getSourceDBPort(), configDto.getSourceDBName()
-			, configDto.getSourceDBUserName(), configDto.getSourceDBPwd(), configDto.getSourceTable()));
+			, configDto.getSourceDBUserName(), configDto.getSourceDBPwd(), configDto.getSourceTable(), configDto.getDays(), dto.getTns()));
 			
 			return dto;
 		}
@@ -65,7 +65,7 @@ public class MoveDtoFactory
 			String jdbcUrl = StringUtils.isEmpty(dto.getTns())?DBMSMetaUtil.concatDBURL(databaseType, configDto.getSourceDBIp(), configDto.getSourceDBPort(), configDto.getSourceDBName()):dto.getTns();
 			dto.setJdbcUrl(jdbcUrl);
 			dto.setTableDto(DBMSMetaUtil.getTableDto(databaseType, Constants.DB_DRIVER_CLASS_TERADATA, configDto.getSourceDBIp(), configDto.getSourceDBPort(), configDto.getSourceDBName()
-			, configDto.getSourceDBUserName(), configDto.getSourceDBPwd(), configDto.getSourceTable()));
+			, configDto.getSourceDBUserName(), configDto.getSourceDBPwd(), configDto.getSourceTable(), configDto.getDays(), dto.getTns()));
 			
 			return dto;
 		}
@@ -103,7 +103,7 @@ public class MoveDtoFactory
 			String jdbcUrl = StringUtils.isEmpty(dto.getTns())?DBMSMetaUtil.concatDBURL(databaseType, configDto.getDestDBIp(), configDto.getDestDBPort(), configDto.getDestDBName()):dto.getTns();
 			dto.setJdbcUrl(jdbcUrl);
 			dto.setTableDto(DBMSMetaUtil.getTableDto(databaseType, Constants.DB_DRIVER_CLASS_ORACLE, configDto.getDestDBIp(), configDto.getDestDBPort(), configDto.getDestDBName()
-			, configDto.getDestDBUserName(), configDto.getDestDBPwd(), configDto.getDestTable()));
+			, configDto.getDestDBUserName(), configDto.getDestDBPwd(), configDto.getDestTable(), configDto.getDays(), dto.getTns()));
 			
 			return dto;
 		}
@@ -123,7 +123,7 @@ public class MoveDtoFactory
 			String jdbcUrl = StringUtils.isEmpty(dto.getTns())?DBMSMetaUtil.concatDBURL(databaseType, configDto.getDestDBIp(), configDto.getDestDBPort(), configDto.getDestDBName()):dto.getTns();
 			dto.setJdbcUrl(jdbcUrl);
 			dto.setTableDto(DBMSMetaUtil.getTableDto(databaseType, Constants.DB_DRIVER_CLASS_TERADATA, configDto.getDestDBIp(), configDto.getDestDBPort(), configDto.getDestDBName()
-					, configDto.getDestDBUserName(), configDto.getDestDBPwd(), configDto.getDestTable()));
+					, configDto.getDestDBUserName(), configDto.getDestDBPwd(), configDto.getDestTable(), configDto.getDays(), dto.getTns()));
 			
 			return dto;
 		}
@@ -143,7 +143,7 @@ public class MoveDtoFactory
 			String jdbcUrl = StringUtils.isEmpty(dto.getTns())?DBMSMetaUtil.concatDBURL(databaseType, configDto.getDestDBIp(), configDto.getDestDBPort(), configDto.getDestDBName()):dto.getTns();
 			dto.setJdbcUrl(jdbcUrl);
 			dto.setTableDto(DBMSMetaUtil.getTableDto(databaseType, Constants.DB_DRIVER_CLASS_VERTICA, configDto.getDestDBIp(), configDto.getDestDBPort(), configDto.getDestDBName()
-					, configDto.getDestDBUserName(), configDto.getDestDBPwd(), configDto.getDestTable()));
+					, configDto.getDestDBUserName(), configDto.getDestDBPwd(), configDto.getDestTable(), configDto.getDays(), dto.getTns()));
 			
 			return dto;
 		}
@@ -167,7 +167,7 @@ public class MoveDtoFactory
 				String jdbcUrl = StringUtils.isEmpty(dto.getTns())?DBMSMetaUtil.concatDBURL(databaseType, configDto.getDestDBIp(), configDto.getDestDBPort(), configDto.getDestDBName()):dto.getTns();
 				dto.setJdbcUrl(jdbcUrl);
 				dto.setTableDto(DBMSMetaUtil.getTableDto(databaseType, Constants.DB_DRIVER_CLASS_HIVE, configDto.getDestDBIp(), configDto.getDestDBPort(), configDto.getDestDBName()
-						, configDto.getDestDBUserName(), configDto.getDestDBPwd(), configDto.getDestTable()));
+						, configDto.getDestDBUserName(), configDto.getDestDBPwd(), configDto.getDestTable(), configDto.getDays(), dto.getTns()));
 			}
 			
 			return dto;
@@ -188,7 +188,7 @@ public class MoveDtoFactory
 			String jdbcUrl = StringUtils.isEmpty(dto.getTns())?DBMSMetaUtil.concatDBURL(databaseType, configDto.getDestDBIp(), configDto.getDestDBPort(), configDto.getDestDBName()):dto.getTns();
 			dto.setJdbcUrl(jdbcUrl);
 			dto.setTableDto(DBMSMetaUtil.getTableDto(databaseType, Constants.DB_DRIVER_CLASS_MYSQL, configDto.getDestDBIp(), configDto.getDestDBPort(), configDto.getDestDBName()
-					, configDto.getDestDBUserName(), configDto.getDestDBPwd(), configDto.getDestTable()));
+					, configDto.getDestDBUserName(), configDto.getDestDBPwd(), configDto.getDestTable(), configDto.getDays(), dto.getTns()));
 			
 			return dto;
 		}

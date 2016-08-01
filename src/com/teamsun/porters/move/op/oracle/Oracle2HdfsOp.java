@@ -1,11 +1,15 @@
 package com.teamsun.porters.move.op.oracle;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.teamsun.porters.move.domain.BaseMoveDomain;
 import com.teamsun.porters.move.domain.OracleDto;
 import com.teamsun.porters.move.domain.conf.ConfigDomain;
+import com.teamsun.porters.move.domain.table.ColumnsDto;
 import com.teamsun.porters.move.exception.BaseException;
 import com.teamsun.porters.move.factory.MoveDtoFactory;
 import com.teamsun.porters.move.op.MoveOpration;
@@ -30,29 +34,67 @@ public class Oracle2HdfsOp extends MoveOpration
 		BaseMoveDomain destDto = MoveDtoFactory.createDestDto(configDto);
 		
 		OracleDto oracleDto = (OracleDto)srcDto;
-		String sqoopCommand = null;
 		
+		String querySql = null;
+		List<String> sqoopCommands = new ArrayList<String>();
 		if (StringUtils.isEmpty(oracleDto.getQuerySql()) && StringUtils.isEmpty(oracleDto.getColumns()))
 		{
-			sqoopCommand = SqoopUtils.genImportFromOralceToHdfs(srcDto, destDto, true);
-		}
-		else
-		{
-			if (StringUtils.isEmpty(oracleDto.getQuerySql()))
+			//如果有分区，则按分区导数据
+			if (!StringUtils.isEmptyWithTrim(oracleDto.getTableDto().getPartitionCol()))
 			{
-				String querySql = "SELECT " + oracleDto.getColumns() + " FROM " + oracleDto.getTableName() + " WHERE \\$CONDITIONS";
-				oracleDto.setQuerySql(querySql);
+				for (String partition : oracleDto.getTableDto().getPartitionList())
+				{
+					querySql = getQuerySql(oracleDto, partition);
+					oracleDto.setQuerySql(querySql);
+					sqoopCommands.add(SqoopUtils.genImportFromOralceToHdfs(oracleDto, destDto, false));
+				}
 			}
-			
-			sqoopCommand = SqoopUtils.genImportFromOralceToHdfs(oracleDto, destDto, false);
+			else
+			{
+				querySql = getQuerySql(oracleDto, null);
+				oracleDto.setQuerySql(querySql);
+				sqoopCommands.add(SqoopUtils.genImportFromOralceToHdfs(oracleDto, destDto, false));
+			}
+//			sqoopCommand = SqoopUtils.genImportFromOralceToHdfs(srcDto, destDto, true);
+		}
+		else if (StringUtils.isEmpty(oracleDto.getQuerySql()))
+		{
+			querySql = "SELECT " + oracleDto.getColumns() + " FROM " + oracleDto.getTableName() + " WHERE \\$CONDITIONS";
+			oracleDto.setQuerySql(querySql);
+			sqoopCommands.add(SqoopUtils.genImportFromOralceToHdfs(oracleDto, destDto, false));
 		}
 		
 		
-		log.info("begin to from oracle to hdfs");
-		String command = sqoopCommand;
-		String res = runCommand(command);
-		log.info("run command res: " + res);
-		log.info("from oracle to hdfs finish");
+//		log.info("begin to from oracle to hdfs");
+		for (String sqoopCommand : sqoopCommands)
+		{
+			String command = sqoopCommand;
+			String res = runCommand(command);
+//			log.info("run command res: " + res);
+		}
+//		log.info("from oracle to hdfs finish");
+	}
+
+	private String getQuerySql(OracleDto oracleDto, String partition)
+	{
+		StringBuffer sb = new StringBuffer("SELECT ");
+		for (ColumnsDto cd : oracleDto.getTableDto().getColumnList())
+		{
+			String colName = cd.getColumnName();
+			String colType = cd.getSqlType();
+			
+			if ("varchar".startsWith(colType.toLowerCase()))
+				sb.append(" replace(replace(replace(to_char(" + colName + "),chr(10),''),chr(13),''),chr(9),'') as " + colName + ", ");
+			else
+				sb.append(colName + " as " + colName + ", ");
+				
+		}
+		
+		sb = new StringBuffer(sb.substring(0, sb.length() - 2));
+		
+		sb.append(" FROM " + oracleDto.getTableName() + " WHERE " + partition!=null?(oracleDto.getTableDto().getPartitionCol() + " = " + partition + " AND "):""  + " \\$CONDITIONS");
+		
+		return sb.toString();
 	}
 
 	@Override

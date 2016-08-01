@@ -8,7 +8,22 @@ public class TableDto implements Serializable
 {
 	private String tableName; 
     private String tableComment; 
+    private String partitionCol; 
     private List<ColumnsDto> columnList = new ArrayList<ColumnsDto>();
+    private List<String> partitionList = new ArrayList<String>();
+    
+	public String getPartitionCol() {
+		return partitionCol;
+	}
+	public void setPartitionCol(String partitionCol) {
+		this.partitionCol = partitionCol;
+	}
+	public List<String> getPartitionList() {
+		return partitionList;
+	}
+	public void setPartitionList(List<String> partitionList) {
+		this.partitionList = partitionList;
+	}
 	public String getTableName() {
 		return tableName;
 	}
