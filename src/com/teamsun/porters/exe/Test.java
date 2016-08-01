@@ -7,9 +7,14 @@ public class Test {
 
 	public static void main(String[] args) throws Exception
 	{
+		String s = "/EMS_Data/teamsun/TB_FACT_STAFF_IN_INFO_D/20160722";
 		
+		int beginIndex = s.indexOf("teamsun/") + 8;
+		int endIndex = s.indexOf("/", beginIndex);
+		System.out.println(s.substring(beginIndex, endIndex));
 		
-//		(DESCRIPTION = (ADDRESS = (PROTOCOL = TCP)(HOST = 10.3.37.18)(PORT = 1521))(CONNECT_DATA = (INSTANCE_NAME = outtrack1) (SERVER = dedicated) (SERVICE_NAME = outtrack))) 
+		System.out.println(beginIndex + "," + endIndex);
+/*//		(DESCRIPTION = (ADDRESS = (PROTOCOL = TCP)(HOST = 10.3.37.18)(PORT = 1521))(CONNECT_DATA = (INSTANCE_NAME = outtrack1) (SERVER = dedicated) (SERVICE_NAME = outtrack))) 
 		Class.forName("oracle.jdbc.driver.OracleDriver");
 //		String url = "jdbc:oracle:thin:@10.3.37.18:1521:DSHK_OUTTRACK";
 //		String url = "jdbc:oracle:thin:@(DESCRIPTION=(ADDRESS=(PROTOCOL=TCP)(HOST = 10.3.37.18)(PORT = 1521))(CONNECT_DATA = (INSTANCE_NAME = outtrack1) (SERVER = dedicated) (SERVICE_NAME = outtrack)))";
@@ -18,7 +23,7 @@ public class Test {
 		String usrname = "bireport";
 		String password = "bireport321";
 		
-		Connection con = DriverManager.getConnection(url, usrname, password);
+		Connection con = DriverManager.getConnection(url, usrname, password);*/
 	}
 
 }

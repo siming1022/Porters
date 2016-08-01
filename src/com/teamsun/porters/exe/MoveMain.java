@@ -43,7 +43,7 @@ public class MoveMain
 	
 //	private static final String EXCEL_LOCATION = "~/app/file/";
 	private static final String EXCEL_LOCATION = "D://porters";
-	private static final int EXEC_COUNT = 500;
+	private static final int EXEC_COUNT = 200;
 	
 	public static void main(String[] args) 
 	{
@@ -79,18 +79,20 @@ public class MoveMain
 				{
 					is = new FileInputStream(excelFile);
 					List<MoveOpration> oprations = getEntitys(ExcelUtil.readExcel(is, false));
-					
+					List<DataMoveThread> threads = new ArrayList<DataMoveThread>();
 					if (oprations != null && oprations.size() > 0)
 					{
 						int threadCount = oprations.size()%EXEC_COUNT==0?oprations.size()/EXEC_COUNT:(oprations.size()/EXEC_COUNT)+1;
 						ExecutorService threadPool = Executors.newFixedThreadPool(threadCount);
-						
+
 						for (int i = 0; i < threadCount; i++)
 						{
 							int beginIndex = i * EXEC_COUNT;
 							int endIndex = ((i+1) * EXEC_COUNT) - 1;
 							endIndex = endIndex>=oprations.size()?oprations.size():endIndex;
-							threadPool.execute(new DataMoveThread(oprations.subList(beginIndex, endIndex)));
+							DataMoveThread dmt = new DataMoveThread(oprations.subList(beginIndex, endIndex));
+							threads.add(dmt);
+							threadPool.execute(dmt);
 						}
 						
 						threadPool.shutdown();
@@ -98,6 +100,23 @@ public class MoveMain
 					else
 					{
 						log.error("没有需要执行的操作");
+					}
+					
+					while (true)
+					{
+						boolean isFinished = false;
+						for (DataMoveThread t : threads)
+						{
+							isFinished = t.isFinished();
+							if (!isFinished)
+								break;
+						}
+						
+						if (isFinished)
+						{
+							log.info("system exit");
+							System.exit(0);
+						}
 					}
 				}
 				catch (Exception e) 

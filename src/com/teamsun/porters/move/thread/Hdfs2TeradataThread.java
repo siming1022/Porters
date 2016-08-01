@@ -116,7 +116,7 @@ public class Hdfs2TeradataThread extends Thread
 		finally
 		{
 			DBMSMetaUtil.close(stm);
-			DBMSMetaUtil.close(conn);
+			DBMSMetaUtil.close(conn, null);
 		}
 		
 	}

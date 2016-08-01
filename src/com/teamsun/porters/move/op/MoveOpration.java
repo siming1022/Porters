@@ -2,6 +2,7 @@ package com.teamsun.porters.move.op;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.net.URLEncoder;
@@ -58,6 +59,7 @@ public abstract class MoveOpration
 	public String runCommand(String command) throws BaseException
 	{
 		StringBuffer sb = new StringBuffer();
+		writeToFile(command);
 //		Log.info(command);
 		/*BufferedReader reader = null;
 		InputStreamReader isr = null;
@@ -189,4 +191,19 @@ public abstract class MoveOpration
 		return str;
 	}
 	
+	
+	public void writeToFile(String string) 
+	{
+		try 
+		{
+			File f = new File("C:\\Users\\Administrator\\Desktop\\代收货款数据迁移\\10.3.37.18-sqoop.txt");
+			FileWriter wr = new FileWriter(f, true);
+			wr.write(new String(string.getBytes("UTF-8")) + "\r\n");
+			wr.close();
+		} 
+		catch (Exception e) 
+		{
+			e.printStackTrace();
+		}
+	}
 }

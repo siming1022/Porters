@@ -70,7 +70,7 @@ public class Hdfs2HbaseOp extends MoveOpration
 		{
 			DBMSMetaUtil.close(rs);
 			DBMSMetaUtil.close(stm);
-			DBMSMetaUtil.close(conn);
+			DBMSMetaUtil.close(conn, null);
 		}
 	}
 

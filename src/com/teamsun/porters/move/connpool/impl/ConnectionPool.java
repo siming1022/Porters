@@ -8,10 +8,16 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.Vector;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.teamsun.porters.move.connpool.IConnectionPool;
 import com.teamsun.porters.move.connpool.bean.DBbean;
 
 public class ConnectionPool implements IConnectionPool {
+	
+	private static Logger log = LoggerFactory.getLogger(ConnectionPool.class);
+	
 	// 连接池配置属性
 	private DBbean dbBean;
 	private boolean isActive = false; // 连接池活动状态
@@ -103,8 +109,29 @@ public class ConnectionPool implements IConnectionPool {
 		Connection conn = null;
 		if (dbBean != null) {
 			Class.forName(dbBean.getDriverName());
-			conn = DriverManager.getConnection(dbBean.getUrl(),
-					dbBean.getUserName(), dbBean.getPassword());
+			boolean getConnFlag = false;
+			
+			while (!getConnFlag)
+			{
+				try 
+				{
+					conn = DriverManager.getConnection(dbBean.getUrl(),
+							dbBean.getUserName(), dbBean.getPassword());
+					getConnFlag = true;
+				}
+				catch (Exception e) 
+				{
+					try {
+						Thread.sleep(3000l);
+						log.info("retry get connection");
+					} catch (InterruptedException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
+					e.printStackTrace();
+				}
+				
+			}
 		}
 		return conn;
 	}
@@ -173,9 +200,9 @@ public class ConnectionPool implements IConnectionPool {
 			// 1.对线程里面的连接状态
 			// 2.连接池最小 最大连接数
 			// 3.其他状态进行检查，因为这里还需要写几个线程管理的类，暂时就不添加了
-			System.out.println("空线池连接数："+freeConnection.size());
-			System.out.println("活动连接数：："+activeConnection.size());
-			System.out.println("总的连接数："+contActive);
+			log.info("空线池连接数："+freeConnection.size());
+			log.info("活动连接数：："+activeConnection.size());
+			log.info("总的连接数："+contActive);
 				}
 			},dbBean.getLazyCheck(),dbBean.getPeriodCheck());
 		}

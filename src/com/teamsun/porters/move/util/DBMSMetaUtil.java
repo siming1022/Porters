@@ -195,7 +195,7 @@ public class DBMSMetaUtil
 			e.printStackTrace();
 		} finally {
 			close(rs);
-			close(conn);
+			close(conn, url);
 		}
 		//
 		
@@ -239,7 +239,7 @@ public class DBMSMetaUtil
 								//如果分区字段类型不是DATE，就需要将WHERE里的条件改变（哪个B建的表，分区字段干毛要弄别的类型，有猫饼）
 								if (!"DATE".equals(cd.getSqlType().toUpperCase()))
 								{
-									partitionWhere = colName + " >= TO_CHAR(SYSDATE - " + days + ", 'YYYYMMDD')";
+									partitionWhere = colName + " >= TO_NUMBER(TO_CHAR(SYSDATE - " + days + ", 'YYYYMMDD'))";
 								}
 							}
 						}
@@ -350,7 +350,7 @@ public class DBMSMetaUtil
 			e.printStackTrace();
 		} finally {
 			close(rs);
-			close(conn);
+			close(conn, null);
 		}
 		//
 		return result;
@@ -413,7 +413,7 @@ public class DBMSMetaUtil
 		} finally {
 			// 关闭资源
 			close(rs);
-			close(conn);
+			close(conn, null);
 		}
 		//
 		return result;
@@ -682,19 +682,27 @@ public class DBMSMetaUtil
 		} catch (Exception e) {
 			e.printStackTrace();
 		} finally{
-			close(conn);
+			close(conn, null);
 		}
 		//
 		return false;
 	}
 	//
-	public static void close(Connection conn) {
-		if(conn!=null) {
-			try {
-				conn.close();
-				conn = null;
-			} catch (SQLException e) {
-				e.printStackTrace();
+	public static void close(Connection conn, String url) {
+		if(conn!=null) 
+		{
+			if (!StringUtils.isEmpty(url))
+			{
+				ConnectionPoolManager.getInstance().close("pool-" + url, conn);
+			}
+			else
+			{
+				try {
+					conn.close();
+					conn = null;
+				} catch (SQLException e) {
+					e.printStackTrace();
+				}
 			}
 		}
 	}

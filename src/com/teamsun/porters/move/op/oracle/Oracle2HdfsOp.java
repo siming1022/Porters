@@ -7,6 +7,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.teamsun.porters.move.domain.BaseMoveDomain;
+import com.teamsun.porters.move.domain.HdfsDto;
 import com.teamsun.porters.move.domain.OracleDto;
 import com.teamsun.porters.move.domain.conf.ConfigDomain;
 import com.teamsun.porters.move.domain.table.ColumnsDto;
@@ -42,10 +43,14 @@ public class Oracle2HdfsOp extends MoveOpration
 			//如果有分区，则按分区导数据
 			if (!StringUtils.isEmptyWithTrim(oracleDto.getTableDto().getPartitionCol()))
 			{
+				HdfsDto hdfsDto = (HdfsDto) destDto;
+				String hdfsLocStr = hdfsDto.getHdfsLoc();
 				for (String partition : oracleDto.getTableDto().getPartitionList())
 				{
 					querySql = getQuerySql(oracleDto, partition);
 					oracleDto.setQuerySql(querySql);
+					
+					hdfsDto.setHdfsLoc(hdfsLocStr + "/" + partition.replaceAll("-", ""));
 					sqoopCommands.add(SqoopUtils.genImportFromOralceToHdfs(oracleDto, destDto, false));
 				}
 			}
@@ -83,7 +88,7 @@ public class Oracle2HdfsOp extends MoveOpration
 			String colName = cd.getColumnName();
 			String colType = cd.getSqlType();
 			
-			if ("varchar".startsWith(colType.toLowerCase()))
+			if ("varchar2".equals(colType.toLowerCase()))
 				sb.append(" replace(replace(replace(to_char(" + colName + "),chr(10),''),chr(13),''),chr(9),'') as " + colName + ", ");
 			else
 				sb.append(colName + " as " + colName + ", ");
@@ -91,8 +96,7 @@ public class Oracle2HdfsOp extends MoveOpration
 		}
 		
 		sb = new StringBuffer(sb.substring(0, sb.length() - 2));
-		
-		sb.append(" FROM " + oracleDto.getTableName() + " WHERE " + partition!=null?(oracleDto.getTableDto().getPartitionCol() + " = " + partition + " AND "):""  + " \\$CONDITIONS");
+		sb.append((" FROM " + oracleDto.getTableName() + " WHERE ") + (partition!=null?(oracleDto.getTableDto().getPartitionCol() + " = '" + partition + "' AND "):"")  + " \\$CONDITIONS");
 		
 		return sb.toString();
 	}

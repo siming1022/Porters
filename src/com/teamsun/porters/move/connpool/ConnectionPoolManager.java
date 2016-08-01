@@ -4,6 +4,9 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Hashtable;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.teamsun.porters.move.connpool.bean.DBbean;
 import com.teamsun.porters.move.connpool.impl.ConnectionPool;
 /**
@@ -13,6 +16,7 @@ import com.teamsun.porters.move.connpool.impl.ConnectionPool;
  */
 public class ConnectionPoolManager {
 	
+	private static Logger log = LoggerFactory.getLogger(ConnectionPoolManager.class);
 	
 	// 连接池存放
 	public Hashtable<String,IConnectionPool> pools = new Hashtable<String, IConnectionPool>();
@@ -37,7 +41,7 @@ public class ConnectionPoolManager {
 		ConnectionPool pool = new ConnectionPool(bean);
 		if(pool != null){
 			pools.put(bean.getPoolName(), pool);
-			System.out.println("Info:Init connection successed ->" +bean.getPoolName());
+			log.info("Info:Init connection successed ->" +bean.getPoolName());
 		}
 	}
 	
@@ -47,7 +51,7 @@ public class ConnectionPoolManager {
 		if(pools.size()>0 && pools.containsKey(poolName)){
 			conn = getPool(poolName).getConnection();
 		}else{
-			System.out.println("Error:Can't find this connecion pool ->"+poolName);
+			log.error("Error:Can't find this connecion pool ->"+poolName);
 		}
 		return conn;
 	}
@@ -60,7 +64,7 @@ public class ConnectionPoolManager {
 					pool.releaseConn(conn);
 				}
 			} catch (SQLException e) {
-				System.out.println("连接池已经销毁");
+				log.error("连接池已经销毁");
 				e.printStackTrace();
 			}
 	}

@@ -13,6 +13,7 @@ public class DataMoveThread extends Thread
 {
 	private static Logger log = LoggerFactory.getLogger(DataMoveThread.class);
 	private List<MoveOpration> moveOps = new ArrayList<MoveOpration>();
+	private boolean isFinish = false;
 	
 	public DataMoveThread() 
 	{
@@ -38,6 +39,14 @@ public class DataMoveThread extends Thread
 				e.printStackTrace();
 			}
 		}
+		
+		isFinish = true;
+		log.info(this.getName() + " run finished");
+	}
+	
+	public boolean isFinished()
+	{
+		return isFinish;
 	}
 
 }

@@ -67,7 +67,7 @@ public class GenPro {
 		}
 	}
 	
-	private static void writeToFile(String string) 
+	public static void writeToFile(String string) 
 	{
 		try 
 		{
