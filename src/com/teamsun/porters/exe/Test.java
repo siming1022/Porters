@@ -2,18 +2,13 @@ package com.teamsun.porters.exe;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.util.ArrayList;
+import java.util.List;
 
 public class Test {
 
 	public static void main(String[] args) throws Exception
 	{
-		String s = "/EMS_Data/teamsun/TB_FACT_STAFF_IN_INFO_D/20160722";
-		
-		int beginIndex = s.indexOf("teamsun/") + 8;
-		int endIndex = s.indexOf("/", beginIndex);
-		System.out.println(s.substring(beginIndex, endIndex));
-		
-		System.out.println(beginIndex + "," + endIndex);
 /*//		(DESCRIPTION = (ADDRESS = (PROTOCOL = TCP)(HOST = 10.3.37.18)(PORT = 1521))(CONNECT_DATA = (INSTANCE_NAME = outtrack1) (SERVER = dedicated) (SERVICE_NAME = outtrack))) 
 		Class.forName("oracle.jdbc.driver.OracleDriver");
 //		String url = "jdbc:oracle:thin:@10.3.37.18:1521:DSHK_OUTTRACK";
@@ -24,6 +19,17 @@ public class Test {
 		String password = "bireport321";
 		
 		Connection con = DriverManager.getConnection(url, usrname, password);*/
+		
+		List<String> l = new ArrayList<String>();
+		l.add("a");
+		l.add("b");
+		l.add("c");
+		l.add("d");
+		l.add("e");
+		l.add("f");
+		
+		System.out.println(l.subList(0, 2));
+		System.out.println(l.subList(2, 4));
 	}
 
 }

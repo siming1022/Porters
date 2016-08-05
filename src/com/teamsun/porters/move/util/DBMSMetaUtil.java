@@ -8,6 +8,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -223,11 +224,13 @@ public class DBMSMetaUtil
 					String colName = rs.getString("COLUMN_NAME");
 					tableDto.setPartitionCol(colName);
 					
-					Statement stm2 = conn.createStatement();
+					
 					
 					
 					//
 					
+					/*
+					Statement stm2 = conn.createStatement();
 					if (!"-1".equals(days))
 					{
 						String partitionWhere = colName + " >= SYSDATE - " + days;
@@ -257,8 +260,48 @@ public class DBMSMetaUtil
 					while (rs2.next())
 					{
 						values.add(rs2.getString("value"));
-					}
+					}*/
 					
+					boolean isNumber = false;
+					for (ColumnsDto cd : tableDto.getColumnList())
+					{
+						if (cd.getColumnName().toUpperCase().equals(colName.toUpperCase()))
+						{
+							//如果分区字段类型不是DATE，就需要将WHERE里的条件改变（哪个B建的表，分区字段干毛要弄别的类型，有猫饼）
+							if (!"DATE".equals(cd.getSqlType().toUpperCase()))
+							{
+								isNumber = true;
+								break;
+							}
+						}
+					}
+					List<String> values = new ArrayList<String>();
+					
+					Calendar c = Calendar.getInstance();
+		    		c.set(Calendar.YEAR, 2015);
+		    		c.set(Calendar.MONTH, 00);
+		    		c.set(Calendar.DAY_OF_MONTH, 01);
+		    		
+		    		Calendar c2 = Calendar.getInstance();
+		    		c2.set(Calendar.YEAR, 2016);
+		    		c2.set(Calendar.MONTH, 7);
+		    		c2.set(Calendar.DAY_OF_MONTH, 02);
+		    		
+		    		while (c2.after(c))
+		    		{
+		    			String value = "";
+		    			if (!isNumber)
+		            	{
+		    				value = c.get(Calendar.YEAR) + "-" + ((c.get(Calendar.MONTH) + 1) < 10?"0"+(c.get(Calendar.MONTH) + 1):(c.get(Calendar.MONTH) + 1)) + "-" +  ((c.get(Calendar.DAY_OF_MONTH)<10?"0"+c.get(Calendar.DAY_OF_MONTH):c.get(Calendar.DAY_OF_MONTH)));
+		            	}
+		            	else
+		            	{
+		            		value = c.get(Calendar.YEAR) + "" + ((c.get(Calendar.MONTH) + 1) < 10?"0"+(c.get(Calendar.MONTH) + 1):(c.get(Calendar.MONTH) + 1)) + "" +  ((c.get(Calendar.DAY_OF_MONTH)<10?"0"+c.get(Calendar.DAY_OF_MONTH):c.get(Calendar.DAY_OF_MONTH)));
+		            	}
+		    			
+		    			values.add(value);
+		    			c.add(Calendar.DAY_OF_YEAR, 1);
+		    		}
 					tableDto.setPartitionList(values);
 				}
 			}

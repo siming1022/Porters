@@ -196,7 +196,9 @@ public abstract class MoveOpration
 	{
 		try 
 		{
-			File f = new File("C:\\Users\\Administrator\\Desktop\\代收货款数据迁移\\10.3.37.18-sqoop.txt");
+//			File f = new File("C:\\Users\\Administrator\\Desktop\\代收货款数据迁移\\10.3.37.18-sqoop.txt");
+//			File f = new File("C:\\Users\\Administrator\\Desktop\\代收货款数据迁移\\10.3.20.212-sqoop.txt");
+			File f = new File("C:\\Users\\Administrator\\Desktop\\代收货款数据迁移\\10.1.200.81-sqoop.txt");
 			FileWriter wr = new FileWriter(f, true);
 			wr.write(new String(string.getBytes("UTF-8")) + "\r\n");
 			wr.close();

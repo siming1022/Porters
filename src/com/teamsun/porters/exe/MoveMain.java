@@ -88,7 +88,7 @@ public class MoveMain
 						for (int i = 0; i < threadCount; i++)
 						{
 							int beginIndex = i * EXEC_COUNT;
-							int endIndex = ((i+1) * EXEC_COUNT) - 1;
+							int endIndex = ((i+1) * EXEC_COUNT);
 							endIndex = endIndex>=oprations.size()?oprations.size():endIndex;
 							DataMoveThread dmt = new DataMoveThread(oprations.subList(beginIndex, endIndex));
 							threads.add(dmt);

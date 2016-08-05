@@ -96,7 +96,7 @@ public class Oracle2HdfsOp extends MoveOpration
 		}
 		
 		sb = new StringBuffer(sb.substring(0, sb.length() - 2));
-		sb.append((" FROM " + oracleDto.getTableName() + " WHERE ") + (partition!=null?(oracleDto.getTableDto().getPartitionCol() + " = '" + partition + "' AND "):"")  + " \\$CONDITIONS");
+		sb.append((" FROM " + oracleDto.getTableName() + " WHERE ") + (partition!=null?(oracleDto.getTableDto().getPartitionCol() + " = TO_DATE('" + partition + "', 'YYYY-MM-DD') AND "):"")  + " \\$CONDITIONS");
 		
 		return sb.toString();
 	}
